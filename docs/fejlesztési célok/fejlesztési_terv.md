@@ -22,10 +22,13 @@ Ez a dokumentum a projekt jövőbeli fejlesztési irányait és tervezett funkci
 - [ ] **Virtuális Bolt:** Az összegyűjtött pontokból kinézeteket (skineket), avatárokat vagy színtémákat lehet venni.
 - [ ] **Jelvények (Badges):** "Mesterlövész" (5 hibátlan feladat), "Maraton" (1 óra tanulás), "Koránkelő".
 
-## 4. Közösségi Funkciók
-- [ ] **Ranglisták (Leaderboards):** Heti és havi rangsor a tanulók között.
-- [ ] **Tanári mód (Classroom):** Tanárok saját feladatsorokat állíthatnak össze és követhetik a diákok haladását.
-- [ ] **Párbaj mód:** Két tanuló versenyezhet ki oldja meg gyorsabban ugyanazt a feladatot.
+## 4. Struktúra és Megjelenés (UX/UI)
+- [ ] **Témakör-választó "Dashboard":** Egy látványos főoldal, ahol kártyákon jelennek meg a fő témák (pl. "Másodfokú egyenletek", "Geometria", "Szöveges feladatok"), látványos ikonokkal és haladásjelzőkkel.
+- [ ] **Breadcrumb navigáció:** Hogy a felhasználó mindig tudja, éppen hol jár (pl. Főoldal > Algebra > Másodfokú > Megoldóképlet).
+- [ ] **Sidebar menü:** Bal oldali, becsukható menü a gyors fejezetváltáshoz hosszú tananyagoknál.
+- [ ] **"Focus Mode":** Gombnyomásra eltűnik minden zavaró elem (menü, lábléc), csak a feladat marad a képernyőn.
+
+## 5. Gamifikáció és Motiváció (Gamification 2.0)
 
 ## 5. Technikai és Platform Fejlesztések
 - [ ] **Felhasználói fiókok és Mentés:** Adatbázis integráció (Supabase/Firebase) a haladás felhőbe mentéséhez.
