@@ -14,6 +14,7 @@ Ez a dokumentum a projekt jövőbeli fejlesztési irányait és tervezett funkci
 - [ ] **AI Tutor:** Chatbot segítség, ami nem mondja meg a megoldást, csak rávezet (pl. "Nézd meg a diszkrimináns előjelét!").
 - [ ] **Szintfelmérő rendszer:** A felhasználó tudásszintjéhez igazodó feladatok (adaptív nehézség).
 - [ ] **Hibaelemzés:** A rendszer felismeri a tipikus típushibákat (pl. előjelhiba) és célzott gyakorlást ajánl.
+- [ ] **"Mégegyet kérek!" funkció:** Ha a tanuló úgy érzi, szüksége van még gyakorlásra egy adott típusból, egy gombnyomással generálhat új, hasonló feladatot.
 
 ## 3. Gamifikáció és Motiváció (Gamification 2.0)
 - [ ] **Tapasztalati pontok (XP) és Szintek:** Minden megoldott feladat XP-t ér, szintlépéskor jutalmak.
