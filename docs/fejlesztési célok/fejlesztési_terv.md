@@ -10,6 +10,7 @@ Ez a dokumentum a projekt jövőbeli fejlesztési irányait és tervezett funkci
 - [ ] **Érettségi felkészítő:** Korábbi évek érettségi feladatai témakörökre bontva.
 
 ## 2. Intelligens Oktatás (AI & Adaptivitás)
+- [ ] **Dinamikus feladatgenerálás:** A fix számok helyett algoritmus generálja a feladatokat (véletlenszerű, de megoldható együtthatókkal), így sosem fogy el a gyakorlóanyag.
 - [ ] **AI Tutor:** Chatbot segítség, ami nem mondja meg a megoldást, csak rávezet (pl. "Nézd meg a diszkrimináns előjelét!").
 - [ ] **Szintfelmérő rendszer:** A felhasználó tudásszintjéhez igazodó feladatok (adaptív nehézség).
 - [ ] **Hibaelemzés:** A rendszer felismeri a tipikus típushibákat (pl. előjelhiba) és célzott gyakorlást ajánl.
