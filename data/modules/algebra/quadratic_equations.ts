@@ -1,6 +1,6 @@
-import { CurriculumItem } from '../types';
+import { CurriculumItem } from '../../../types';
 
-export const curriculum: CurriculumItem[] = [
+export const quadraticCurriculum: CurriculumItem[] = [
   // --- 1. MÁSODFOKÚ EGYENLETEK ---
   {
     id: 'intro-theory',
@@ -18,11 +18,11 @@ export const curriculum: CurriculumItem[] = [
     inputType: 'matching',
     question: `Párosítsd a diszkrimináns értékét ($D$) a valós megoldások számával!`,
     matchPairs: [
-        { left: '$D > 0$', right: '2 különböző valós gyök' },
-        { left: '$D = 0$', right: '1 valós gyök (két egybeeső)' },
-        { left: '$D < 0$', right: 'Nincs valós megoldás' }
+      { left: '$D > 0$', right: '2 különböző valós gyök' },
+      { left: '$D = 0$', right: '1 valós gyök (két egybeeső)' },
+      { left: '$D < 0$', right: 'Nincs valós megoldás' }
     ],
-    correctAnswer: 'implied', 
+    correctAnswer: 'implied',
     hint: 'Gondolj a gyökvonásra! Pozitívból két gyök van (+ és -), nullából csak nulla, negatívból pedig...',
     successMessage: 'Pontosan! A diszkrimináns előjele dönti el a megoldások számát.'
   },
@@ -137,9 +137,9 @@ A grafikus megoldás lépései:
       <text x="0.5" y="3.0" font-size="0.5" fill="#4f46e5" text-anchor="middle">Min</text>
     </svg>`,
     matchPairs: [
-        { left: 'Parabola állása ($a=1$)', right: 'Felfelé nyílik' },
-        { left: 'Zérushelyek', right: '$x_1=-1, x_2=2$' },
-        { left: 'Keresett tartomány ($\\le 0$)', right: 'Tengely alatti rész' }
+      { left: 'Parabola állása ($a=1$)', right: 'Felfelé nyílik' },
+      { left: 'Zérushelyek', right: '$x_1=-1, x_2=2$' },
+      { left: 'Keresett tartomány ($\\le 0$)', right: 'Tengely alatti rész' }
     ],
     correctAnswer: 'implied',
     hint: 'Az "a" pozitív, tehát mosolyog. A gyököket megadtuk (piros pöttyök). A "kisebb" jel jelenti az "alatt"-ot.',
@@ -158,9 +158,9 @@ A grafikus megoldás lépései:
     
     Mi a megoldás intervalluma?`,
     options: [
-        '$x \\le -1$ vagy $x \\ge 2$ (szélső tartományok)',
-        '$-1 \\le x \\le 2$ (a két gyök között)',
-        '$-1 < x < 2$ (a két gyök között, határok nélkül)'
+      '$x \\le -1$ vagy $x \\ge 2$ (szélső tartományok)',
+      '$-1 \\le x \\le 2$ (a két gyök között)',
+      '$-1 < x < 2$ (a két gyök között, határok nélkül)'
     ],
     correctAnswer: '$-1 \\le x \\le 2$ (a két gyök között)',
     hint: 'Mivel a parabola "hasas" része van a tengely alatt, ez a két gyök közötti rész. A $\\le$ jel miatt a határok is beletartoznak (zárt).',
@@ -189,9 +189,9 @@ A grafikus megoldás lépései:
     Mielőtt megoldanánk a $\\sqrt{2x - 1} = 5$ egyenletet, vizsgáljuk meg, mely számokra értelmezhető.
     Mi a feltétele annak, hogy a gyökös kifejezés létezzen a valós számok halmazán?`,
     options: [
-        '$2x - 1 > 0$ (szigorúan pozitív)',
-        '$2x - 1 \\ge 0$ (nemnegatív)',
-        '$2x - 1 \\neq 0$ (nem nulla)'
+      '$2x - 1 > 0$ (szigorúan pozitív)',
+      '$2x - 1 \\ge 0$ (nemnegatív)',
+      '$2x - 1 \\neq 0$ (nem nulla)'
     ],
     correctAnswer: '$2x - 1 \\ge 0$ (nemnegatív)',
     hint: 'A négyzetgyök alatt állhat 0 is ($\\sqrt{0}=0$), de negatív szám nem.',
@@ -307,9 +307,9 @@ A grafikus megoldás lépései:
     
     Az első egyenlet ($x + y = -3$) lineáris, ebből könnyen kifejezhetjük az $y$-t. Melyik a helyes átalakítás?`,
     options: [
-        '$y = -3 + x$',
-        '$y = -3 - x$',
-        '$y = x - 3$'
+      '$y = -3 + x$',
+      '$y = -3 - x$',
+      '$y = x - 3$'
     ],
     correctAnswer: '$y = -3 - x$',
     hint: 'Vond ki az x-et mindkét oldalból!',
@@ -325,7 +325,7 @@ A grafikus megoldás lépései:
     $$x \\cdot (-3 - x) = -10$$
     
     Bontsd fel a zárójelet, és rendezd az egyenletet 0-ra ($ax^2 + bx + c = 0$ alakba)! Írd be az együtthatókat a megfelelő helyre!`,
-    correctAnswer: [['1', '3', '-10'], ['-1', '-3', '10']], 
+    correctAnswer: [['1', '3', '-10'], ['-1', '-3', '10']],
     hint: 'Zárójelbontás: $-3x - x^2 = -10$. Rendezd az egyenletet 0-ra (vidd át az összes tagot az egyik oldalra).',
     successMessage: 'Pontos! Az egyenlet rendezve: $x^2 + 3x - 10 = 0$ (vagy $-x^2 - 3x + 10 = 0$).'
   },
@@ -348,8 +348,8 @@ A grafikus megoldás lépései:
     
     Tudjuk, hogy $y = -3 - x$. Számítsd ki az y-t mindkét x értékhez!`,
     inputLabels: [
-        'Ha $x = 2$, akkor $y =$',
-        'Ha $x = -5$, akkor $y =$'
+      'Ha $x = 2$, akkor $y =$',
+      'Ha $x = -5$, akkor $y =$'
     ],
     correctAnswer: ['-5', '2'],
     hint: 'Helyettesíts be: $-3 - 2$ és $-3 - (-5)$.',
