@@ -4,6 +4,7 @@ import { generateMappingProblem } from '../../../utils/QuestionGenerator';
 export const functionBasicsCurriculum: CurriculumItem[] = [
     // --- 2. FÜGGVÉNYEK BEVEZETÉSE ---
     {
+        chapter: 'Függvények bevezetése',
         id: 'func-intro-analogy',
         type: 'theory',
         title: '2. Függvények bevezetése',
@@ -52,6 +53,7 @@ export const functionBasicsCurriculum: CurriculumItem[] = [
 
     // --- 2.1 DEFINÍCIÓK ---
     {
+        chapter: 'Függvények bevezetése',
         id: 'func-definitions',
         type: 'theory',
         title: 'Fogalmak',
@@ -108,6 +110,7 @@ export const functionBasicsCurriculum: CurriculumItem[] = [
 
     // --- 2.2 EGYÉRTELMŰSÉG ---
     {
+        chapter: 'Függvények bevezetése',
         id: 'func-unambiguous',
         type: 'theory',
         title: 'Mikor "függvény" egy hozzárendelés?',
@@ -140,6 +143,7 @@ export const functionBasicsCurriculum: CurriculumItem[] = [
 
     // --- GYAKORLÁS: EGYÉRTELMŰSÉG ---
     {
+        chapter: 'Függvények bevezetése',
         id: 'func-real-1',
         type: 'question',
         inputType: 'multiple-choice',
@@ -155,6 +159,7 @@ export const functionBasicsCurriculum: CurriculumItem[] = [
         hint: 'Van-e olyan gyerek, akinek 0 vagy 2 vér szerinti édesanyja van? Nincs.'
     },
     {
+        chapter: 'Függvények bevezetése',
         id: 'func-real-2',
         type: 'question',
         inputType: 'multiple-choice',
@@ -174,6 +179,7 @@ export const functionBasicsCurriculum: CurriculumItem[] = [
 
     // --- 2.3 KÖLCSÖNÖSEN EGYÉRTELMŰ ---
     {
+        chapter: 'Függvények bevezetése',
         id: 'func-bijective',
         type: 'theory',
         title: 'Kölcsönösen egyértelmű',
@@ -190,5 +196,45 @@ export const functionBasicsCurriculum: CurriculumItem[] = [
 
     // --- GYAKORLÁS: KÖLCSÖNÖSEN EGYÉRTELMŰ ---
     // --- GYAKORLÁS: KÖLCSÖNÖSEN EGYÉRTELMŰ ---
-    generateMappingProblem('mapping-2')
+    generateMappingProblem('mapping-2'),
+
+    // --- FEJEZET KVÍZ ---
+    {
+        chapter: 'Függvények bevezetése',
+        id: 'quiz-function-basics',
+        type: 'quiz',
+        title: 'Összefoglaló kvíz (opcionális)',
+        description: 'Nem kötelező, de segít rögzíteni a tanultakat. Ellenőrizd, mennyire érted a függvények alapfogalmait!',
+        minScoreToPass: 2,
+        questions: [
+            {
+                question: 'Mikor nevezünk egy hozzárendelést függvénynek?',
+                inputType: 'multiple-choice',
+                options: ['Ha minden bemenethez pontosan egy kimenet tartozik', 'Ha minden kimenethez pontosan egy bemenet tartozik', 'Ha van inverze'],
+                correctAnswer: 'Ha minden bemenethez pontosan egy kimenet tartozik',
+                hint: 'A kulcsszó: EGYÉRTELMŰ hozzárendelés.'
+            },
+            {
+                question: 'Mi az értelmezési tartomány ($D_f$)?',
+                inputType: 'multiple-choice',
+                options: ['Ahonnan indulunk (bemeneti értékek)', 'Ahová érkezünk (kimeneti értékek)', 'Az összes lehetséges szám'],
+                correctAnswer: 'Ahonnan indulunk (bemeneti értékek)',
+                hint: 'A "D" a "domain" (tartomány) rövidítése.'
+            },
+            {
+                question: 'Mi az értékkészlet ($R_f$)?',
+                inputType: 'multiple-choice',
+                options: ['A ténylegesen felvett kimeneti értékek', 'Az összes lehetséges bemenet', 'A függvény képlete'],
+                correctAnswer: 'A ténylegesen felvett kimeneti értékek',
+                hint: 'Az "R" a "range" (készlet) rövidítése.'
+            },
+            {
+                question: 'Minden emberhez rendeljük a testmagasságát. Ez függvény?',
+                inputType: 'multiple-choice',
+                options: ['Igen', 'Nem'],
+                correctAnswer: 'Igen',
+                hint: 'Van-e olyan ember, akinek 2 különböző testmagassága van egyszerre?'
+            }
+        ]
+    }
 ];

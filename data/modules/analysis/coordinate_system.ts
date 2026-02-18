@@ -3,6 +3,7 @@ import { CurriculumItem } from '../../../types';
 export const coordinateSystemCurriculum: CurriculumItem[] = [
     // --- 1. KOORDINÁTARENDSZER ALAPOK ---
     {
+        chapter: 'Koordináta-rendszer',
         id: 'coord-intro',
         type: 'theory',
         title: '1. A derékszögű koordinátarendszer',
@@ -21,6 +22,7 @@ export const coordinateSystemCurriculum: CurriculumItem[] = [
         }
     },
     {
+        chapter: 'Koordináta-rendszer',
         id: 'coord-read-step1',
         type: 'question',
         inputType: 'key-value',
@@ -93,6 +95,7 @@ export const coordinateSystemCurriculum: CurriculumItem[] = [
         onRegenerate: true
     },
     {
+        chapter: 'Koordináta-rendszer',
         id: 'coord-quadrants-theory',
         type: 'theory',
         title: 'Síknegyedek',
@@ -149,6 +152,7 @@ export const coordinateSystemCurriculum: CurriculumItem[] = [
         </svg>`
     },
     {
+        chapter: 'Koordináta-rendszer',
         id: 'coord-quadrant-q1',
         type: 'question',
         inputType: 'matching',
@@ -167,6 +171,7 @@ export const coordinateSystemCurriculum: CurriculumItem[] = [
         successMessage: 'Ügyes vagy! Az előjelek egyértelműen meghatározzák a síknegyedet.'
     },
     {
+        chapter: 'Koordináta-rendszer',
         id: 'coord-plot-intro',
         type: 'theory',
         title: 'Gyakorlat: Pontok ábrázolása',
@@ -175,6 +180,7 @@ export const coordinateSystemCurriculum: CurriculumItem[] = [
         Kattints a rácspontokra a koordináták megadásához.`
     },
     {
+        chapter: 'Koordináta-rendszer',
         id: 'coord-plot-p1',
         type: 'question',
         inputType: 'coordinate-plot',
@@ -187,6 +193,7 @@ export const coordinateSystemCurriculum: CurriculumItem[] = [
         successMessage: 'Pontos találat! Ez a (2; 3) pont.'
     },
     {
+        chapter: 'Koordináta-rendszer',
         id: 'coord-plot-p2',
         type: 'question',
         inputType: 'coordinate-plot',
@@ -199,6 +206,7 @@ export const coordinateSystemCurriculum: CurriculumItem[] = [
         successMessage: 'Szuper! Megtaláltad a III. síknegyedben lévő pontot.'
     },
     {
+        chapter: 'Koordináta-rendszer',
         id: 'coord-plot-p3',
         type: 'question',
         inputType: 'coordinate-plot',
@@ -209,5 +217,46 @@ export const coordinateSystemCurriculum: CurriculumItem[] = [
         correctAnswer: '0,4',
         hint: 'Az x koordináta 0, tehát nem lépünk sem jobbra, sem balra. Csak felfelé 4-et.',
         successMessage: 'Helyes! Ez a pont az y-tengelyre esik.'
+    },
+
+    // --- FEJEZET KVÍZ ---
+    {
+        id: 'quiz-coordinate-system',
+        type: 'quiz',
+        chapter: 'Koordináta-rendszer',
+        title: 'Összefoglaló kvíz (opcionális)',
+        description: 'Nem kötelező, de segít rögzíteni a tanultakat. Ellenőrizd, mennyire érted a koordinátarendszer alapjait!',
+        minScoreToPass: 2,
+        isSummary: true, // Enable certificate generation
+        questions: [
+            {
+                question: 'A koordinátarendszer tengelyeinek metszéspontja...',
+                inputType: 'multiple-choice',
+                options: ['Az origó (0; 0)', 'Az (1; 1) pont', 'A zérushely'],
+                correctAnswer: 'Az origó (0; 0)',
+                hint: 'A központi pont neve.'
+            },
+            {
+                question: 'Ha $x > 0$ és $y > 0$, melyik síknegyedben van a pont?',
+                inputType: 'multiple-choice',
+                options: ['I. (jobb felső)', 'II. (bal felső)', 'III. (bal alsó)'],
+                correctAnswer: 'I. (jobb felső)',
+                hint: 'Mindkét koordináta pozitív = jobbra ÉS fel.'
+            },
+            {
+                question: 'Az $x$-tengely melyik irányba mutat?',
+                inputType: 'multiple-choice',
+                options: ['Vízszintesen jobbra', 'Függőlegesen felfelé', 'Átlósan'],
+                correctAnswer: 'Vízszintesen jobbra',
+                hint: 'A "vízszintes" tengelyt keresed.'
+            },
+            {
+                question: 'A $P(3; -2)$ pont hol helyezkedik el?',
+                inputType: 'multiple-choice',
+                options: ['IV. síknegyed (jobb alsó)', 'I. síknegyed (jobb felső)', 'III. síknegyed (bal alsó)'],
+                correctAnswer: 'IV. síknegyed (jobb alsó)',
+                hint: '$x > 0$ (jobbra), $y < 0$ (lefelé).'
+            }
+        ]
     }
 ];

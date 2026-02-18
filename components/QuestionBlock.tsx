@@ -11,9 +11,19 @@ interface Props {
   onComplete: () => void;
   isCompleted: boolean;
   onRegenerate?: () => void;
+  onMistake?: () => void;
+  // New props for strict mode
+  strictMode?: boolean; // If true, one attempt only, no hints
+  onStrictFail?: () => void; // Called immediately on wrong answer in strict mode
+  compact?: boolean; // If true, removes header and left border for cleaner UI
 }
 
-const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegenerate }) => {
+const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegenerate, onMistake, strictMode, onStrictFail, compact }) => {
+  const [dynamicData, setDynamicData] = useState<QuestionBlockData | null>(null);
+
+  // Effective data to use (dynamic or static)
+  const effectiveData = dynamicData || data;
+
   const [singleInput, setSingleInput] = useState('');
   // We use this state array for 'roots-set', 'coefficients', 'quadratic-equation' and 'key-value'
   const [rootInputs, setRootInputs] = useState<string[]>(['', '', '']);
@@ -32,12 +42,28 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
 
   // Initialize matching state when data changes or component mounts
   useEffect(() => {
-    if (data.inputType === 'matching' && data.matchPairs) {
-      const shuffled = [...data.matchPairs].sort(() => Math.random() - 0.5);
+    if (!data) return;
+
+    // Handle Dynamic Generation
+    let currentData = data;
+    if (data.generate) {
+      const generated = data.generate();
+      currentData = { ...data, ...generated };
+      setDynamicData(currentData);
+    } else {
+      setDynamicData(null);
+    }
+
+    initializeState(currentData);
+  }, [data]); // Re-run if data prop changes (e.g. from parent regeneration)
+
+  const initializeState = (d: QuestionBlockData) => {
+    if (d.inputType === 'matching' && d.matchPairs) {
+      const shuffled = [...d.matchPairs].sort(() => Math.random() - 0.5);
       setShuffledPairs(shuffled);
-      setMatchingSlots(new Array(data.matchPairs.length).fill(null));
+      setMatchingSlots(new Array(d.matchPairs.length).fill(null));
       // Shuffle the right side answers for the pool
-      const rights = data.matchPairs.map(p => p.right);
+      const rights = d.matchPairs.map(p => p.right);
       setMatchingPool([...rights].sort(() => Math.random() - 0.5));
     } else {
       // Reset specific states for other types if needed
@@ -54,10 +80,11 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
     setRootInputs(['', '', '']);
     setFeedback(null);
     setAttempts(0);
-  }, [data]);
+  };
 
   // Helper to render inline elements: LaTeX, Bold, and Italic
   const renderInline = (text: string) => {
+    if (!text) return null; // Safe guard
     const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g);
     return parts.map((part, index) => {
       if (part.startsWith('$$') && part.endsWith('$$')) {
@@ -72,7 +99,7 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
         <span key={index}>
           {boldParts.map((subPart, subIndex) => {
             if (subPart.startsWith('**') && subPart.endsWith('**')) {
-              return <strong key={subIndex} className="font-bold">{subPart.slice(2, -2)}</strong>;
+              return <strong key={subIndex} className="font-bold text-slate-900 dark:text-slate-100">{subPart.slice(2, -2)}</strong>;
             }
 
             // Handle Italic (*text*) inside non-bold parts
@@ -98,26 +125,26 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
     return text.split('\n').map((line, lineIdx) => {
       const trimmed = line.trim();
       if (!trimmed) return <div key={lineIdx} className="h-2" />;
-      return <div key={lineIdx} className="mb-2 leading-relaxed">{renderInline(trimmed)}</div>;
+      return <div key={lineIdx} className="mb-2 leading-relaxed text-slate-700 dark:text-slate-300">{renderInline(trimmed)}</div>;
     });
   };
 
   const getValidSolutions = (): string[][] => {
-    if (Array.isArray(data.correctAnswer)) {
-      if (data.correctAnswer.length > 0 && Array.isArray(data.correctAnswer[0])) {
-        return data.correctAnswer as string[][];
+    if (Array.isArray(effectiveData.correctAnswer)) {
+      if (effectiveData.correctAnswer.length > 0 && Array.isArray(effectiveData.correctAnswer[0])) {
+        return effectiveData.correctAnswer as string[][];
       } else {
-        return [data.correctAnswer as string[]];
+        return [effectiveData.correctAnswer as string[]];
       }
     } else {
-      return [[data.correctAnswer as string]];
+      return [[effectiveData.correctAnswer as string]];
     }
   };
 
   const checkAnswer = () => {
     let isCorrect = false;
 
-    if (data.inputType === 'coefficients' || data.inputType === 'quadratic-equation') {
+    if (effectiveData.inputType === 'coefficients' || effectiveData.inputType === 'quadratic-equation') {
       const userValues = [rootInputs[0] || '', rootInputs[1] || '', rootInputs[2] || ''];
       const validSolutions = getValidSolutions();
 
@@ -125,8 +152,8 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
         userValues.every((val, idx) => areValuesEqual(val, solution[idx]))
       );
 
-    } else if (data.inputType === 'key-value') {
-      const count = data.inputLabels?.length || 0;
+    } else if (effectiveData.inputType === 'key-value') {
+      const count = effectiveData.inputLabels?.length || 0;
       const userValues = [];
       for (let i = 0; i < count; i++) {
         userValues.push(rootInputs[i] || '');
@@ -139,7 +166,7 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
         userValues.every((val, idx) => areValuesEqual(val, solution[idx]))
       );
 
-    } else if (data.inputType === 'roots-set') {
+    } else if (effectiveData.inputType === 'roots-set') {
       const userValues = [rootInputs[0] || '', rootInputs[1] || ''].filter(val => val.trim() !== '');
 
       const validSolutions = getValidSolutions();
@@ -162,68 +189,72 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
           return false;
         });
       });
-    } else if (data.inputType === 'matching') {
+    } else if (effectiveData.inputType === 'matching') {
       if (shuffledPairs.length > 0) {
         isCorrect = shuffledPairs.every((pair, idx) => matchingSlots[idx] === pair.right);
         if (matchingSlots.some(s => s === null)) isCorrect = false;
       }
-    } else if (data.inputType === 'numeric') {
+    } else if (effectiveData.inputType === 'numeric') {
       const userVal = singleInput;
       // Assume numeric answer is simple string or string[] (alternatives)
-      const correctVal = Array.isArray(data.correctAnswer)
-        ? (Array.isArray(data.correctAnswer[0]) ? data.correctAnswer[0][0] : data.correctAnswer[0])
-        : (data.correctAnswer as string);
+      const correctVal = Array.isArray(effectiveData.correctAnswer)
+        ? (Array.isArray(effectiveData.correctAnswer[0]) ? effectiveData.correctAnswer[0][0] : effectiveData.correctAnswer[0])
+        : (effectiveData.correctAnswer as string);
 
       isCorrect = areValuesEqual(userVal, correctVal);
 
-    } else if (data.inputType === 'coordinate-plot') {
-      if (data.targetLine && Array.isArray(selectedPoint) && (selectedPoint as any).length === 2) {
+    } else if (effectiveData.inputType === 'coordinate-plot') {
+      if (effectiveData.targetLine && Array.isArray(selectedPoint) && (selectedPoint as any).length === 2) {
         // Validate line: y = mx + b
         const p1 = (selectedPoint as any)[0];
         const p2 = (selectedPoint as any)[1];
 
         if (p1.x === p2.x) {
-          // Vertical line - not supported by functions usually, but let's say we don't expect it here.
+          // Vertical line - not supported for function plotting tasks (y = mx+b)
           isCorrect = false;
         } else {
-          const m = (p2.y - p1.y) / (p2.x - p1.x);
-          const b = p1.y - m * p1.x;
+          const targetM = effectiveData.targetLine.m;
+          const targetB = effectiveData.targetLine.b;
 
-          const targetM = data.targetLine.m;
-          const targetB = data.targetLine.b;
-
-          // Float comparison tolerance
+          // Check if BOTH points satisfy the equation y = mx + b
+          // allowing for small floating point errors
           const epsilon = 0.001;
-          isCorrect = Math.abs(m - targetM) < epsilon && Math.abs(b - targetB) < epsilon;
+          const val1 = targetM * p1.x + targetB;
+          const val2 = targetM * p2.x + targetB;
+
+          const p1Correct = Math.abs(p1.y - val1) < epsilon;
+          const p2Correct = Math.abs(p2.y - val2) < epsilon;
+
+          isCorrect = p1Correct && p2Correct;
         }
 
-      } else if (data.targetCoordinates && Array.isArray(selectedPoint)) {
+      } else if (effectiveData.targetCoordinates && Array.isArray(selectedPoint)) {
         // Validate set of points (order independent)
         const selectedPointsArray = selectedPoint as { x: number; y: number }[];
 
-        if (selectedPointsArray.length !== data.targetCoordinates.length) {
+        if (selectedPointsArray.length !== effectiveData.targetCoordinates.length) {
           isCorrect = false;
         } else {
           // Check if every target point has a match in selected points
-          isCorrect = data.targetCoordinates.every(target =>
+          isCorrect = effectiveData.targetCoordinates.every(target =>
             selectedPointsArray.some(p => p.x === target.x && p.y === target.y)
           );
         }
 
-      } else if (data.targetCoordinate && selectedPoint && !Array.isArray(selectedPoint)) {
-        isCorrect = selectedPoint.x === data.targetCoordinate.x && selectedPoint.y === data.targetCoordinate.y;
+      } else if (effectiveData.targetCoordinate && selectedPoint && !Array.isArray(selectedPoint)) {
+        isCorrect = selectedPoint.x === effectiveData.targetCoordinate.x && selectedPoint.y === effectiveData.targetCoordinate.y;
       }
     } else {
       // Basic string fallback for others
       const userVal = singleInput.trim();
-      const correctVal = Array.isArray(data.correctAnswer)
-        ? (Array.isArray(data.correctAnswer[0]) ? data.correctAnswer[0][0] : data.correctAnswer[0])
-        : data.correctAnswer as string;
+      const correctVal = Array.isArray(effectiveData.correctAnswer)
+        ? (Array.isArray(effectiveData.correctAnswer[0]) ? effectiveData.correctAnswer[0][0] : effectiveData.correctAnswer[0])
+        : effectiveData.correctAnswer as string;
       isCorrect = userVal === correctVal;
     }
 
     if (isCorrect) {
-      setFeedback({ type: 'success', msg: data.successMessage || 'Helyes válasz!' });
+      setFeedback({ type: 'success', msg: effectiveData.successMessage || 'Helyes válasz!' });
 
       if (!isCompleted) {
         // Reliable confetti from bottom center
@@ -237,11 +268,49 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
         onComplete();
       }
     } else {
+      // Strict Mode Handling
+      if (strictMode) {
+        setFeedback({ type: 'error', msg: 'Helytelen válasz. A köröd véget ért.' });
+        if (onStrictFail) onStrictFail();
+        return;
+      }
+
       setAttempts(prev => prev + 1);
-      setFeedback({
-        type: 'error',
-        msg: attempts >= 0 ? data.hint : 'Próbáld újra!'
-      });
+      const currentAttempts = attempts + 1; // logical attempt count after this failure
+
+      let msg = 'Nem jó válasz, próbáld újra!'; // Default 1st level
+      let type: 'error' | 'hint' = 'error';
+
+      if (currentAttempts === 1) {
+        // Level 1: Just error
+        msg = 'Nem jó válasz, próbáld újra!';
+        type = 'error';
+      } else if (currentAttempts === 2) {
+        // Level 2: Hint
+        msg = effectiveData.hint || 'Próbáld újra!';
+        type = 'hint';
+      } else if (currentAttempts === 3) {
+        // Level 3: Detailed Hint (First step or Breakdown)
+        if (effectiveData.detailedHint) {
+          msg = effectiveData.detailedHint;
+          type = 'hint';
+        } else if (effectiveData.explanation) {
+          // Fallback to explanation if no detailed hint
+          msg = effectiveData.explanation;
+          type = 'hint';
+        } else {
+          msg = effectiveData.hint || 'Próbáld újra!';
+          type = 'hint';
+        }
+      } else {
+        // Level 4+: Explanation or stick to Level 3
+        msg = effectiveData.explanation || effectiveData.detailedHint || effectiveData.hint || 'Próbáld újra!';
+        type = 'hint';
+      }
+
+      setFeedback({ type, msg });
+
+      if (onMistake) onMistake();
     }
   };
 
@@ -271,35 +340,44 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
 
   const isInteractive = !isCompleted;
 
-  return (
-    <div id={data.id} className={`scroll-mt-24 bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden border-l-4 ${isCompleted ? 'border-green-500 dark:border-green-400' : 'border-indigo-500 dark:border-indigo-400'} mb-6 transition-colors duration-300`}>
-      <div className="p-6 sm:p-8">
-        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-          <HelpCircle className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
-          Feladat
-        </h3>
+  if (!effectiveData) {
+    return <div className="p-4 text-red-500">Hiba: Nem található feladat adat.</div>;
+  }
 
-        <div className="mb-6 text-slate-700 text-lg">
-          {renderText(data.question)}
+  return (
+    <div id={effectiveData.id || 'question-block'} className={`relative scroll-mt-24 bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden ${compact ? '' : `border-t-4 ${isCompleted ? 'border-green-500 dark:border-green-400' : 'border-indigo-500 dark:border-indigo-400'}`} mb-6 transition-colors duration-300`}>
+
+      {/* Type Badge - Only if not compact */}
+      {!compact && (
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 ${isCompleted ? 'bg-green-500 dark:bg-green-400' : 'bg-indigo-500 dark:bg-indigo-400'} text-white text-xs font-bold px-4 py-1 rounded-b-xl uppercase tracking-wider shadow-sm`}>
+          ❓ Feladat
+        </div>
+      )}
+
+      <div className={`${compact ? 'p-2' : 'p-6 sm:p-8 pt-12'}`}>
+
+
+        <div className="mb-6 text-slate-700 dark:text-slate-200 text-lg">
+          {renderText(effectiveData.question)}
         </div>
 
         {/* Illustration Area */}
-        {data.diagramConfig && data.diagramConfig.type === 'coordinate-system' ? (
+        {effectiveData.diagramConfig && effectiveData.diagramConfig.type === 'coordinate-system' ? (
           <div className="mb-8 flex justify-center">
             <CoordinateSystem
               isInteractive={false}
               width={300}
               height={300}
               range={5}
-              initialPoints={data.diagramConfig.points}
+              initialPoints={effectiveData.diagramConfig.points}
               showGrid={true}
               showLabels={true}
             />
           </div>
-        ) : data.illustration ? (
+        ) : effectiveData.illustration ? (
           <div className="mb-8 flex justify-center bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-700">
             <div
-              dangerouslySetInnerHTML={{ __html: data.illustration }}
+              dangerouslySetInnerHTML={{ __html: effectiveData.illustration }}
               className="w-full max-w-md 
                 [&_.grid-path]:stroke-slate-200 dark:[&_.grid-path]:stroke-slate-700 
                 [&_.axis-marker]:fill-slate-400 dark:[&_.axis-marker]:fill-slate-500 
@@ -309,6 +387,8 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
                 [&_.point-group_circle]:fill-red-500 dark:[&_.point-group_circle]:fill-red-400
                 [&_.point-group_line]:stroke-red-500 dark:[&_.point-group_line]:stroke-red-400
                 [&_.axis-label-text]:fill-slate-600 dark:[&_.axis-label-text]:fill-slate-400
+                [&_text]:fill-slate-700 dark:[&_text]:fill-slate-200
+                [&_path]:stroke-slate-700 dark:[&_path]:stroke-slate-200
               "
             />
           </div>
@@ -317,16 +397,16 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
         {/* Input Area */}
         <div className="space-y-6">
 
-          {data.inputType === 'multiple-choice' && data.options && (
-            <div className="grid grid-cols-1 gap-3">
-              {data.options.map((opt, idx) => (
+          {effectiveData.inputType === 'multiple-choice' && effectiveData.options && (
+            <div className={`grid gap-3 ${effectiveData.options.length <= 3 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+              {effectiveData.options.map((opt, idx) => (
                 <button
                   key={idx}
                   disabled={!isInteractive}
                   onClick={() => setSingleInput(opt)}
                   className={`p-4 rounded-lg border-2 text-left transition-all text-lg ${singleInput === opt
-                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-200'
+                    ? 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-200 font-medium ring-1 ring-indigo-400'
+                    : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
                     } ${!isInteractive && singleInput !== opt ? 'opacity-50' : ''}`}
                 >
                   {renderInline(opt)}
@@ -335,11 +415,11 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
             </div>
           )}
 
-          {data.inputType === 'numeric' && (
-            <div className={`flex items-center gap-3 ${data.inputPrefix ? 'flex-row' : 'flex-col sm:flex-row'}`}>
-              {data.inputPrefix && (
-                <div className="text-xl text-slate-800 font-serif">
-                  {renderInline(data.inputPrefix)}
+          {effectiveData.inputType === 'numeric' && (
+            <div className={`flex items-center gap-3 ${effectiveData.inputPrefix ? 'flex-row' : 'flex-col sm:flex-row'}`}>
+              {effectiveData.inputPrefix && (
+                <div className="text-xl text-slate-800 dark:text-slate-200 font-serif">
+                  {renderInline(effectiveData.inputPrefix)}
                 </div>
               )}
               <input
@@ -347,25 +427,25 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
                 value={singleInput}
                 onChange={(e) => setSingleInput(e.target.value)}
                 disabled={!isInteractive}
-                placeholder={data.inputPrefix ? "" : "Írd ide a választ..."}
-                className={`${data.inputPrefix ? 'w-32 text-center font-bold' : 'w-full md:w-2/3'} p-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-lg transition-colors`}
+                placeholder={effectiveData.inputPrefix ? "" : "Írd ide a választ..."}
+                className={`${effectiveData.inputPrefix ? 'w-32 text-center font-bold' : 'w-full md:w-2/3'} p-3 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-lg transition-colors`}
               />
             </div>
           )}
 
-          {data.inputType === 'key-value' && data.inputLabels && (
-            <div className={`flex flex-wrap gap-x-8 gap-y-4 bg-slate-50 p-6 rounded-xl border border-slate-100 ${data.layout === 'coordinate' ? 'justify-center' : ''}`}>
+          {effectiveData.inputType === 'key-value' && effectiveData.inputLabels && (
+            <div className={`flex flex-wrap gap-x-8 gap-y-4 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl border border-slate-100 dark:border-slate-700 ${effectiveData.layout === 'coordinate' ? 'justify-center' : ''}`}>
 
-              {data.layout === 'coordinate' ? (
-                <div className="flex items-center gap-2 text-2xl font-serif text-slate-800">
-                  {data.inputPrefix && <span className="font-bold mr-1">{renderInline(data.inputPrefix)}</span>}
+              {effectiveData.layout === 'coordinate' ? (
+                <div className="flex items-center gap-2 text-2xl font-serif text-slate-800 dark:text-slate-200">
+                  {effectiveData.inputPrefix && <span className="font-bold mr-1">{renderInline(effectiveData.inputPrefix)}</span>}
                   <span>(</span>
                   <input
                     type="text"
                     value={rootInputs[0] || ''}
                     onChange={(e) => handleRootInputChange(0, e.target.value)}
                     disabled={!isInteractive}
-                    className="w-16 p-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-xl"
+                    className="w-16 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-xl"
                     placeholder="x"
                   />
                   <span className="mx-1">;</span>
@@ -374,21 +454,21 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
                     value={rootInputs[1] || ''}
                     onChange={(e) => handleRootInputChange(1, e.target.value)}
                     disabled={!isInteractive}
-                    className="w-16 p-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-xl"
+                    className="w-16 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-xl"
                     placeholder="y"
                   />
                   <span>)</span>
                 </div>
               ) : (
-                data.inputLabels.map((label, idx) => (
+                effectiveData.inputLabels.map((label, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <div className="text-lg text-slate-700 font-medium">{renderInline(label)}</div>
+                    <div className="text-lg text-slate-700 dark:text-slate-300 font-medium">{renderInline(label)}</div>
                     <input
                       type="text"
                       value={rootInputs[idx] || ''}
                       onChange={(e) => handleRootInputChange(idx, e.target.value)}
                       disabled={!isInteractive}
-                      className="w-20 p-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-lg"
+                      className="w-20 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-lg"
                       placeholder="?"
                     />
                   </div>
@@ -397,52 +477,52 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
             </div>
           )}
 
-          {data.inputType === 'coefficients' && (
-            <div className="flex flex-wrap gap-4 items-center justify-start bg-slate-50 p-4 rounded-xl border border-slate-100">
+          {effectiveData.inputType === 'coefficients' && (
+            <div className="flex flex-wrap gap-4 items-center justify-start bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
               <div className="flex items-center gap-2">
-                <span className="text-xl text-slate-700"><Latex>a =</Latex></span>
+                <span className="text-xl text-slate-700 dark:text-slate-300"><Latex>a =</Latex></span>
                 <input
                   type="text"
                   value={rootInputs[0] || ''}
                   onChange={(e) => handleRootInputChange(0, e.target.value)}
                   disabled={!isInteractive}
-                  className="w-20 p-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-lg"
+                  className="w-20 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-lg"
                   placeholder="?"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xl text-slate-700"><Latex>b =</Latex></span>
+                <span className="text-xl text-slate-700 dark:text-slate-300"><Latex>b =</Latex></span>
                 <input
                   type="text"
                   value={rootInputs[1] || ''}
                   onChange={(e) => handleRootInputChange(1, e.target.value)}
                   disabled={!isInteractive}
-                  className="w-20 p-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-lg"
+                  className="w-20 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-lg"
                   placeholder="?"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xl text-slate-700"><Latex>c =</Latex></span>
+                <span className="text-xl text-slate-700 dark:text-slate-300"><Latex>c =</Latex></span>
                 <input
                   type="text"
                   value={rootInputs[2] || ''}
                   onChange={(e) => handleRootInputChange(2, e.target.value)}
                   disabled={!isInteractive}
-                  className="w-20 p-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-lg"
+                  className="w-20 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold text-lg"
                   placeholder="?"
                 />
               </div>
             </div>
           )}
 
-          {data.inputType === 'quadratic-equation' && (
-            <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-50 dark:bg-slate-900 p-6 rounded-xl border border-slate-100 dark:border-slate-700 font-serif text-xl border-slate-800 dark:text-slate-200">
+          {effectiveData.inputType === 'quadratic-equation' && (
+            <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl border border-slate-100 dark:border-slate-700 font-serif text-xl text-slate-800 dark:text-slate-200">
               <input
                 type="text"
                 value={rootInputs[0] || ''}
                 onChange={(e) => handleRootInputChange(0, e.target.value)}
                 disabled={!isInteractive}
-                className="w-16 p-2 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold"
+                className="w-16 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold"
                 placeholder="a"
               />
               <Latex>x^2 +</Latex>
@@ -451,7 +531,7 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
                 value={rootInputs[1] || ''}
                 onChange={(e) => handleRootInputChange(1, e.target.value)}
                 disabled={!isInteractive}
-                className="w-16 p-2 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold"
+                className="w-16 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold"
                 placeholder="b"
               />
               <Latex>x +</Latex>
@@ -460,60 +540,76 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
                 value={rootInputs[2] || ''}
                 onChange={(e) => handleRootInputChange(2, e.target.value)}
                 disabled={!isInteractive}
-                className="w-16 p-2 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold"
+                className="w-16 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 outline-none text-center font-bold"
                 placeholder="c"
               />
               <Latex>= 0</Latex>
             </div>
           )}
 
-          {data.inputType === 'roots-set' && (
-            <div className="flex flex-col sm:flex-row gap-6 items-center bg-slate-50 p-4 rounded-xl border border-slate-100 w-fit">
+          {effectiveData.inputType === 'roots-set' && (
+            <div className={`flex flex-col sm:flex-row gap-6 items-center ${compact ? '' : 'bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700'} w-fit`}>
               <div className="flex items-center gap-3">
-                <span className="text-lg text-slate-700"><Latex>x_1 =</Latex></span>
+                <span className="text-lg text-slate-700 dark:text-slate-300"><Latex>x_1 =</Latex></span>
                 <input
                   type="text"
                   value={rootInputs[0] || ''}
                   onChange={(e) => handleRootInputChange(0, e.target.value)}
                   disabled={!isInteractive}
-                  className="w-24 p-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-center text-lg"
+                  className="w-24 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-center text-lg"
                 />
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-lg text-slate-700"><Latex>x_2 =</Latex></span>
+                <span className="text-lg text-slate-700 dark:text-slate-300"><Latex>x_2 =</Latex></span>
                 <input
                   type="text"
                   value={rootInputs[1] || ''}
                   onChange={(e) => handleRootInputChange(1, e.target.value)}
                   disabled={!isInteractive}
-                  className="w-24 p-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-center text-lg"
+                  className="w-24 p-2 border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-center text-lg"
                 />
               </div>
             </div>
           )}
 
-          {data.inputType === 'matching' && shuffledPairs.length > 0 && (
+          {effectiveData.inputType === 'matching' && shuffledPairs.length > 0 && (
             <div className="space-y-8">
               {/* Slots Area */}
               <div className="space-y-3">
                 {shuffledPairs.map((pair, idx) => (
-                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <div className="sm:w-1/3 text-lg font-medium pl-2">
+                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <div className="sm:w-1/3 text-lg font-medium pl-2 text-slate-800 dark:text-slate-200">
                       {renderInline(pair.left)}
                     </div>
                     <div className="flex-1">
                       <button
                         disabled={!isInteractive}
                         onClick={() => handleSlotClick(idx)}
+                        onDragOver={(e) => {
+                          if (!isInteractive) return;
+                          e.preventDefault(); // Allow dropping
+                          e.dataTransfer.dropEffect = 'copy';
+                        }}
+                        onDrop={(e) => {
+                          if (!isInteractive) return;
+                          e.preventDefault();
+                          const item = e.dataTransfer.getData('text/plain');
+                          if (item) {
+                            const newSlots = [...matchingSlots];
+                            newSlots[idx] = item;
+                            setMatchingSlots(newSlots);
+                            setSelectedPoolItem(null); // Clear selection if any
+                          }
+                        }}
                         className={`w-full p-3 rounded-lg border-2 border-dashed transition-all flex items-center justify-center sm:justify-between min-h-[3.5rem]
                                         ${matchingSlots[idx]
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-semibold border-solid'
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-semibold border-solid'
                             : selectedPoolItem
-                              ? 'border-indigo-300 bg-indigo-50/50 hover:bg-indigo-50'
-                              : 'border-slate-300 bg-white text-slate-400 hover:border-slate-400'
+                              ? 'border-indigo-300 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'
+                              : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900/50 text-slate-400 dark:text-slate-500 hover:border-slate-400 dark:hover:border-slate-500'
                           }`}
                       >
-                        <span>
+                        <span className={matchingSlots[idx] ? '' : 'text-slate-400 dark:text-slate-500'}>
                           {matchingSlots[idx]
                             ? renderInline(matchingSlots[idx]!)
                             : (selectedPoolItem ? "Kattints a beillesztéshez" : "Húzd ide vagy válassz alulról...")}
@@ -527,17 +623,23 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
 
               {/* Pool Area */}
               {isInteractive && (
-                <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
-                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Választható elemek:</p>
+                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl shadow-sm">
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Választható elemek:</p>
                   <div className="flex flex-wrap gap-3">
                     {matchingPool.filter(item => !matchingSlots.includes(item)).map((item, idx) => (
                       <button
                         key={idx}
+                        draggable={isInteractive}
+                        onDragStart={(e) => {
+                          if (!isInteractive) return;
+                          e.dataTransfer.setData('text/plain', item);
+                          e.dataTransfer.effectAllowed = 'copy';
+                        }}
                         onClick={() => handlePoolItemClick(item)}
-                        className={`px-4 py-3 rounded-lg border-2 text-sm md:text-base font-medium transition-all transform active:scale-95
+                        className={`px-4 py-3 rounded-lg border-2 text-sm md:text-base font-medium transition-all transform active:scale-95 cursor-grab active:cursor-grabbing
                                         ${selectedPoolItem === item
                             ? 'border-indigo-600 bg-indigo-600 text-white shadow-lg scale-105'
-                            : 'border-slate-200 hover:border-indigo-300 hover:text-indigo-700 bg-white text-slate-700'
+                            : 'border-slate-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-400 bg-white dark:bg-slate-700/50 text-slate-700 dark:text-slate-200'
                           }`}
                       >
                         {renderInline(item)}
@@ -553,29 +655,26 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
 
           )}
 
-          {data.inputType === 'coordinate-plot' && (
+
+          {effectiveData.inputType === 'coordinate-plot' && (
             <div className="flex justify-center">
               <CoordinateSystem
                 isInteractive={isInteractive}
-                targetPoint={data.targetCoordinate}
+                targetPoint={effectiveData.targetCoordinate}
                 width={300}
                 height={300}
                 range={5}
                 onPointSelect={(points) => {
                   // Handle both single point and array
                   if (Array.isArray(points)) {
-                    setSelectedPoint(points[0]); // Keep backward compatibility for state type if simple, but we really need array state
-                    // Actually, we need to adapt state. 
-                    // Let's cast to any to store array or single object in selectedPoint state variable 
-                    // or better, use a Ref or check type.
-                    // Simplest for now: store array in selectedPoint (as any)
+                    // Store array in selectedPoint (cast to any to match simple state type for now)
                     setSelectedPoint(points as any);
                   } else {
                     setSelectedPoint(points);
                   }
                 }}
-                maxPoints={data.maxPoints || 1}
-                drawMode={data.drawMode || 'point'}
+                maxPoints={effectiveData.maxPoints || 1}
+                drawMode={effectiveData.drawMode || 'point'}
               />
             </div>
           )}
@@ -611,16 +710,22 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
         )}
 
         {feedback && !isCompleted && (
-          <div className={`mt-6 p-4 rounded-lg flex items-start gap-3 animate-fade-in border ${feedback.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200'
+          <div className={`mt-6 p-4 rounded-lg flex items-start gap-3 animate-fade-in border ${feedback.type === 'success'
+            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+            : feedback.type === 'hint'
+              ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200'
+              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
             }`}>
             {feedback.type === 'success' ? (
               <CheckCircle2 className="w-6 h-6 mt-0.5 shrink-0" />
+            ) : feedback.type === 'hint' ? (
+              <HelpCircle className="w-6 h-6 mt-0.5 shrink-0" />
             ) : (
               <AlertCircle className="w-6 h-6 mt-0.5 shrink-0" />
             )}
             <div>
               <span className="font-bold block mb-1 text-lg">
-                {feedback.type === 'success' ? 'Helyes!' : 'Segítség:'}
+                {feedback.type === 'success' ? 'Helyes!' : feedback.type === 'hint' ? (attempts >= 3 && data.explanation ? 'Magyarázat:' : 'Segítség:') : 'Hiba:'}
               </span>
               <span className="leading-relaxed">{renderInline(feedback.msg)}</span>
             </div>

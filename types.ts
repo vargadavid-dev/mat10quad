@@ -1,10 +1,11 @@
-export type BlockType = 'theory' | 'question';
+export type BlockType = 'theory' | 'question' | 'quiz';
 export type QuestionType = 'multiple-choice' | 'numeric' | 'roots-set' | 'coefficients' | 'matching' | 'quadratic-equation' | 'key-value' | 'coordinate-plot';
 
 export interface BaseBlock {
   id: string;
   type: BlockType;
   title?: string;
+  chapter?: string; // Optional chapter grouping label
 }
 
 export interface TheoryBlockData extends BaseBlock {
@@ -28,6 +29,8 @@ export interface QuestionBlockData extends BaseBlock {
   correctAnswer: string | string[] | string[][]; // For numeric/text string, for roots-set array of strings, for coefficients multiple valid arrays
   matchPairs?: { left: string; right: string }[]; // For matching type
   hint: string;
+  detailedHint?: string; // Step 3: Specific solution step or breakdown
+  explanation?: string; // Deep explanation shown after multiple failures
   successMessage?: string;
   inputPrefix?: string; // LaTeX label before input, e.g. "$x \ge$"
   inputLabels?: string[]; // Labels for multiple inputs (key-value type)
@@ -43,6 +46,24 @@ export interface QuestionBlockData extends BaseBlock {
   drawMode?: 'point' | 'line';
   onRegenerate?: boolean;
   layout?: 'default' | 'coordinate';
+  // Dynamic question generation
+  generate?: () => {
+    question: string;
+    correctAnswer: string | string[] | string[][];
+    explanation?: string;
+    hint?: string;
+    detailedHint?: string;
+    options?: string[]; // For dynamic multiple choice
+    matchPairs?: { left: string; right: string }[]; // For dynamic matching
+  };
 }
 
-export type CurriculumItem = TheoryBlockData | QuestionBlockData;
+export interface QuizBlockData extends BaseBlock {
+  type: 'quiz';
+  description?: string;
+  questions: Omit<QuestionBlockData, 'type' | 'id'>[]; // Re-use question structure but without individual IDs
+  minScoreToPass?: number; // Optional threshold
+  isSummary?: boolean; // If true, certificate generation is available
+}
+
+export type CurriculumItem = TheoryBlockData | QuestionBlockData | QuizBlockData;

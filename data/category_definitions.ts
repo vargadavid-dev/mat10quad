@@ -8,7 +8,7 @@ export interface Category {
 export interface SubCategory {
     id: string;
     title: string;
-    isAvailable?: boolean; // To mark if content actually exists
+    isAvailable?: boolean;
 }
 
 export const textColors = {
@@ -62,7 +62,8 @@ export const categories: Category[] = [
         id: 'geometry',
         title: 'Geometria',
         subcategories: [
-            { id: 'plane_geometry', title: 'Síkgeometria' },
+            { id: 'circle', title: 'Kör', isAvailable: true },
+            { id: 'plane_geometry', title: 'Egyéb Síkgeometria' },
             { id: 'trigonometry', title: 'Trigonometria' },
             { id: 'coord_geometry', title: 'Koordinátageometria' },
             { id: 'solid_geometry', title: 'Térgeometria' }

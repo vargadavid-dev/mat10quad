@@ -62,6 +62,46 @@ export const quadraticCurriculum: CurriculumItem[] = [
     hint: 'A számlálóban $-(-5)$ az $+5$. $\\sqrt{1}$ az $1$. Tehát $\\frac{5 \\pm 1}{2}$.',
     successMessage: 'Kiváló! Megkaptuk a megoldásokat: 2 és 3.'
   },
+  {
+    id: 'practice-ch1-q1',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Mi a diszkrimináns képlete?',
+    options: ['$b^2 - 4ac$', '$b^2 + 4ac$', '$\\sqrt{b^2 - 4ac}$'],
+    correctAnswer: '$b^2 - 4ac$',
+    hint: 'A gyök alatti kifejezés.',
+    successMessage: 'Helyes! A $b^2 - 4ac$ a diszkrimináns.'
+  },
+  {
+    id: 'practice-ch1-q2',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Hány valós megoldása van az egyenletnek, ha $D = 0$?',
+    options: ['0', '1', '2'],
+    correctAnswer: '1',
+    hint: 'Ha a diszkrimináns nulla, akkor egyetlen megoldás van.',
+    successMessage: 'Így van! $D=0$ esetén egybeeső valós gyökök vannak (1 megoldás).'
+  },
+  {
+    id: 'practice-ch1-q3',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Oldd meg fejben: $x^2 - 9 = 0$. Mi(k) a megoldás(ok)?',
+    options: ['Csak 3', '3 és -3', '9'],
+    correctAnswer: '3 és -3',
+    hint: '$x^2 = 9$ → $x = \\pm\\sqrt{9}$.',
+    successMessage: 'Pontos! Két megoldás van: +3 és -3.'
+  },
+  {
+    id: 'practice-ch1-q4',
+    type: 'question',
+    inputType: 'numeric',
+    question: 'Számold ki a diszkriminánst! $x^2 + 4x + 3 = 0$ (itt $a=1$, $b=4$, $c=3$)',
+    inputPrefix: '$D =$',
+    correctAnswer: '4',
+    hint: '$D = b^2 - 4ac = 16 - 12 = ?$',
+    successMessage: 'Helyes! $D = 16 - 12 = 4$.'
+  },
 
   // --- 2. MÁSODFOKÚ EGYENLŐTLENSÉGEK ---
   {
@@ -165,6 +205,46 @@ A grafikus megoldás lépései:
     correctAnswer: '$-1 \\le x \\le 2$ (a két gyök között)',
     hint: 'Mivel a parabola "hasas" része van a tengely alatt, ez a két gyök közötti rész. A $\\le$ jel miatt a határok is beletartoznak (zárt).',
     successMessage: 'Tökéletes! Ez a zárt intervallum a megoldás.'
+  },
+  {
+    id: 'practice-ch2-q1',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Ha $a > 0$, merre nyílik a parabola?',
+    options: ['Felfelé', 'Lefelé', 'Oldalra'],
+    correctAnswer: 'Felfelé',
+    hint: 'Pozitív "a" = mosolygós parabola.',
+    successMessage: 'Helyes! Ha "a" pozitív, akkor felfelé nyílik.'
+  },
+  {
+    id: 'practice-ch2-q2',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Ha egy egyenlőtlenség $\\le 0$ alakú, a parabola melyik részét keressük?',
+    options: ['Az x-tengely FELETTI részt', 'Az x-tengely ALATTI részt', 'Csak a zérushelyeket'],
+    correctAnswer: 'Az x-tengely ALATTI részt',
+    hint: 'A függvény ott "kisebb vagy egyenlő nullánál", ahol a görbe a tengely alatt van (vagy rajta).',
+    successMessage: 'Pontos! A lefelé mutató irány a negatív értékeket jelenti.'
+  },
+  {
+    id: 'practice-ch2-q3',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Mikor tartoznak a zérushelyek a megoldáshalmazba?',
+    options: ['Ha $\\ge$ vagy $\\le$ a jel', 'Ha $>$ vagy $<$ a jel', 'Mindig'],
+    correctAnswer: 'Ha $\\ge$ vagy $\\le$ a jel',
+    hint: 'A zárt intervallumokat az egyenlőséges jelek adják.',
+    successMessage: 'Így van! A "megengedő" egyenlőtlenségeknél a határ is beletartozik.'
+  },
+  {
+    id: 'practice-ch2-q4',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Ha a parabola lefelé nyílik és $> 0$ a feltétel, hol a megoldás?',
+    options: ['A két gyök között', 'A két gyökön kívül', 'Nincs megoldás'],
+    correctAnswer: 'A két gyök között',
+    hint: 'A lefelé nyíló parabola "teteje" van a tengely felett.',
+    successMessage: 'Helyes! A lefelé nyíló parabola "púpja" esik a pozitív tartományba (a két gyök közé).'
   },
 
   // --- 3. NÉGYZETGYÖKÖS EGYENLETEK ---
@@ -275,6 +355,46 @@ A grafikus megoldás lépései:
     hint: 'Gondolj arra: ha $x=3$, akkor $x^2=9$. De ha $x=-3$, akkor is $x^2=9$. Visszafelé ez problémát okozhat.',
     successMessage: 'Pontosan! Hamis gyökök keletkezhetnek.'
   },
+  {
+    id: 'practice-ch3-q1',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Mi a feltétele annak, hogy a $\\sqrt{x-5}$ kifejezés értelmezhető legyen?',
+    options: ['$x \\ge 5$', '$x > 5$', '$x < 5$'],
+    correctAnswer: '$x \\ge 5$',
+    hint: 'A gyök alatt nem állhat negatív szám.',
+    successMessage: 'Helyes! $x-5 \\ge 0$, tehát $x \\ge 5$.'
+  },
+  {
+    id: 'practice-ch3-q2',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Miért kötelező az ellenőrzés négyzetre emelés után?',
+    options: ['Mert hamis gyökök keletkezhetnek', 'Mert a tanár kéri', 'Mert gyorsabb'],
+    correctAnswer: 'Mert hamis gyökök keletkezhetnek',
+    hint: 'A négyzetre emelés nem ekvivalens átalakítás.',
+    successMessage: 'Pontos! Ezt sose felejtsd el.'
+  },
+  {
+    id: 'practice-ch3-q3',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Mi a $\\sqrt{x+3} = 4$ egyenlet megoldása?',
+    options: ['$x = 1$', '$x = 13$', '$x = 7$'],
+    correctAnswer: '$x = 13$',
+    hint: 'Négyzetre emelve: $x + 3 = 16$.',
+    successMessage: 'Helyes! $x = 16 - 3 = 13$.'
+  },
+  {
+    id: 'practice-ch3-q4',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Ha a kikötés $x \\ge 2$, és a kapott gyök $x = 1$, mi a megoldás?',
+    options: ['$x = 1$', 'Nincs megoldás', '$x = 2$'],
+    correctAnswer: 'Nincs megoldás',
+    hint: 'A kapott érték nem felel meg a kikötésnek.',
+    successMessage: 'Így van! Ha a gyök nem esik a tartományba, el kell vetni.'
+  },
 
   // --- 4. EGYENLETRENDSZEREK ---
   {
@@ -369,5 +489,84 @@ A grafikus megoldás lépései:
     correctAnswer: 'Igen',
     hint: '$2 \\cdot (-5) = -10$ és $(-5) \\cdot 2 = -10$.',
     successMessage: 'Szuper! Sikeresen megoldottuk az egyenletrendszert.'
+  },
+  {
+    id: 'practice-ch4-q1',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Melyik módszert használjuk leggyakrabban másodfokú egyenletrendszereknél?',
+    options: ['Behelyettesítő módszer', 'Összeadás-kivonás', 'Grafikus megoldás'],
+    correctAnswer: 'Behelyettesítő módszer',
+    hint: 'Az egyik egyenletből kifejezzük az egyik ismeretlent...',
+    successMessage: 'Helyes! Ez a legbiztosabb módszer általában.'
+  },
+  {
+    id: 'practice-ch4-q2',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Mi az utolsó lépés az egyenletrendszer megoldása után?',
+    options: ['Ellenőrzés', 'Négyzetre emelés', 'Összeadás'],
+    correctAnswer: 'Ellenőrzés',
+    hint: 'A kapott számpárokat vissza kell helyettesíteni.',
+    successMessage: 'Pontos! Mindig ellenőrizd a kapott párokat.'
+  },
+  {
+    id: 'practice-ch4-q3',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Hány megoldáspárja lehet egy másodfokú egyenletrendszernek?',
+    options: ['Legfeljebb 2', 'Pontosan 1', 'Végtelen'],
+    correctAnswer: 'Legfeljebb 2',
+    hint: 'A másodfokú egyenletnek maximum 2 gyöke van.',
+    successMessage: 'Így van! 0, 1 vagy 2 megoldáspár lehetséges.'
+  },
+  {
+    id: 'practice-ch4-q4',
+    type: 'question',
+    inputType: 'multiple-choice',
+    question: 'Ha $x + y = 5$ és $x \\cdot y = 6$, mik az $x$ és $y$ értékei?',
+    options: ['2 és 3', '1 és 6', '0 és 5'],
+    correctAnswer: '2 és 3',
+    hint: 'Szorzatuk 6, összegük 5. Melyik két szám ez?',
+    successMessage: 'Helyes! 2+3=5 és 2*3=6.'
+  },
+
+  // --- ÖSSZEGZŐ KVÍZ ---
+  {
+    id: 'quiz-summary',
+    type: 'quiz',
+    title: 'Összegző kvíz (opcionális)',
+    description: 'Nem kötelező, de segít rögzíteni a tanultakat. 4 vegyes kérdés.',
+    minScoreToPass: 2,
+    questions: [
+      {
+        question: 'Mi a diszkrimináns képlete?',
+        inputType: 'multiple-choice',
+        options: ['$b^2 - 4ac$', '$b^2 + 4ac$', '$\\sqrt{b^2 - 4ac}$'],
+        correctAnswer: '$b^2 - 4ac$',
+        hint: 'A gyök alatti kifejezés.'
+      },
+      {
+        question: 'Hány valós megoldása van az egyenletnek, ha $D = 0$?',
+        inputType: 'multiple-choice',
+        options: ['0', '1', '2'],
+        correctAnswer: '1',
+        hint: 'Ha a diszkrimináns nulla, akkor csak egyféleképpen tudunk kivonni/hozzáadni nullát.'
+      },
+      {
+        question: 'Oldd meg fejben: $x^2 - 9 = 0$. Mi(k) a megoldás(ok)?',
+        inputType: 'multiple-choice',
+        options: ['Csak 3', '3 és -3', '9 és -9'],
+        correctAnswer: '3 és -3',
+        hint: 'Melyik számnak a négyzete a 9? Kettő ilyen van.'
+      },
+      {
+        question: 'Mi a feltétele annak, hogy a $\\sqrt{x-5}$ kifejezés értelmezhető legyen?',
+        inputType: 'multiple-choice',
+        options: ['$x \\ge 5$', '$x > 5$', '$x < 5$'],
+        correctAnswer: '$x \\ge 5$',
+        hint: 'A gyök alatt nem állhat negatív szám. Tehát $x-5 \\ge 0$.'
+      }
+    ]
   }
 ];

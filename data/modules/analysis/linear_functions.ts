@@ -3,6 +3,7 @@ import { CurriculumItem } from '../../../types';
 export const linearFunctionsCurriculum: CurriculumItem[] = [
     // --- 1. BEVEZETÉS ---
     {
+        chapter: 'Lineáris függvények',
         id: 'linear-intro',
         type: 'theory',
         title: '3. Lineáris függvények',
@@ -30,6 +31,7 @@ export const linearFunctionsCurriculum: CurriculumItem[] = [
 
     // --- 2.1 EGYENES ARÁNYOSSÁG ---
     {
+        chapter: 'Lineáris függvények',
         id: 'linear-direct-prop',
         type: 'theory',
         title: 'Egyenes arányosság',
@@ -52,6 +54,7 @@ export const linearFunctionsCurriculum: CurriculumItem[] = [
 
     // --- 3. MEREDEKSÉG (LÉPCSŐZÉS) ---
     {
+        chapter: 'Lineáris függvények',
         id: 'linear-slope-fraction',
         type: 'theory',
         title: 'Meredekség törtként',
@@ -79,6 +82,7 @@ export const linearFunctionsCurriculum: CurriculumItem[] = [
 
     // --- 3.2 NEGATÍV MEREDEKSÉG ---
     {
+        chapter: 'Lineáris függvények',
         id: 'linear-slope-negative',
         type: 'theory',
         title: 'Csökkenő meredekség',
@@ -107,6 +111,7 @@ export const linearFunctionsCurriculum: CurriculumItem[] = [
 
     // --- 4. GYAKORLÁS: PARAMÉTEREK ---
     {
+        chapter: 'Lineáris függvények',
         id: 'linear-params-kv',
         type: 'question',
         inputType: 'key-value',
@@ -122,6 +127,7 @@ export const linearFunctionsCurriculum: CurriculumItem[] = [
 
     // --- 5. GYAKORLÁS: ÁBRÁZOLÁS ---
     {
+        chapter: 'Lineáris függvények',
         id: 'linear-plot-basic',
         type: 'question',
         inputType: 'coordinate-plot',
@@ -142,6 +148,7 @@ export const linearFunctionsCurriculum: CurriculumItem[] = [
 
     // --- 6. GYAKORLÁS: EGYENES ARÁNYOSSÁG ÁBRÁZOLÁSA ---
     {
+        chapter: 'Lineáris függvények',
         id: 'linear-plot-direct',
         type: 'question',
         inputType: 'coordinate-plot',
@@ -161,6 +168,7 @@ export const linearFunctionsCurriculum: CurriculumItem[] = [
 
     // --- 7. GYAKORLÁS: TÖRTES MEREDEKSÉG ÁBRÁZOLÁSA ---
     {
+        chapter: 'Lineáris függvények',
         id: 'linear-plot-fraction',
         type: 'question',
         inputType: 'coordinate-plot',
@@ -174,5 +182,45 @@ export const linearFunctionsCurriculum: CurriculumItem[] = [
         hint: 'Indulj a +2-ről (y-tengely). A törtes meredekség 1/2: 2 lépés jobbra, 1 lépés fel.',
         successMessage: 'Kiváló! Jól alkalmaztad a lépcsőzés módszerét.',
         onRegenerate: true
+    },
+
+    // --- FEJEZET KVÍZ ---
+    {
+        chapter: 'Lineáris függvények',
+        id: 'quiz-linear-functions',
+        type: 'quiz',
+        title: 'Összefoglaló kvíz (opcionális)',
+        description: 'Nem kötelező, de segít rögzíteni a tanultakat. Ellenőrizd, mennyire érted a lineáris függvényeket!',
+        minScoreToPass: 2,
+        questions: [
+            {
+                question: 'Mi az $y = mx + b$ képletben az "$m$"?',
+                inputType: 'multiple-choice',
+                options: ['Meredekség', 'Tengelymetszet', 'Zérushely'],
+                correctAnswer: 'Meredekség',
+                hint: 'Az egyenes "dőlésszöge".'
+            },
+            {
+                question: 'Mi az $y = mx + b$ képletben a "$b$"?',
+                inputType: 'multiple-choice',
+                options: ['Meredekség', 'Tengelymetszet (hol metszi az y-tengelyt)', 'Zérushely'],
+                correctAnswer: 'Tengelymetszet (hol metszi az y-tengelyt)',
+                hint: 'Ha $x = 0$, mennyi lesz $y$?'
+            },
+            {
+                question: 'Ha $m < 0$, az egyenes...',
+                inputType: 'multiple-choice',
+                options: ['Emelkedő (balról jobbra fel)', 'Süllyedő (balról jobbra le)', 'Vízszintes'],
+                correctAnswer: 'Süllyedő (balról jobbra le)',
+                hint: 'Negatív meredekség = csökkenő függvény.'
+            },
+            {
+                question: 'Az egyenes arányosság ($y = mx$) mindig átmegy...',
+                inputType: 'multiple-choice',
+                options: ['Az origón (0;0)', 'A (0;1) ponton', 'Az (1;0) ponton'],
+                correctAnswer: 'Az origón (0;0)',
+                hint: 'Ha $b = 0$, akkor $y(0) = 0$.'
+            }
+        ]
     }
 ];

@@ -1,3 +1,5 @@
+import { getDifficulty } from './DifficultyConfig';
+
 export interface QuadraticProblem {
     a: number;
     b: number;
@@ -302,4 +304,304 @@ export const generateMappingProblem = (id: string): any => { // Changed Question
                 ? 'Helyes! Minden elemhez pontosan egy pár tartozik, és visszafelé is egyértelmű.'
                 : 'Helyes! Ez egy függvény, mert minden elemhez pontosan egy nyíl tartozik (de nem kölcsönösen egyértelmű).')
     };
+};
+
+export const generateDuelQuestions = (topics: string[], count: number): any[] => {
+    const questions: any[] = [];
+    const generatedSignatures = new Set<string>();
+
+    let attempts = 0;
+    const MAX_ATTEMPTS = count * 10; // Prevent infinite loops
+
+    while (questions.length < count && attempts < MAX_ATTEMPTS) {
+        attempts++;
+        const id = `duel-${questions.length}-${Date.now()}-${attempts}`;
+        let q: any = null;
+        let signature = '';
+
+        // Pick a random topic from the selected list
+        const topic = topics[Math.floor(Math.random() * topics.length)];
+        let difficulty = 2; // Default
+
+        if (topic === 'quadratic') {
+            const subType = ['coeffs', 'roots', 'discriminant', 'num_roots', 'vieta_sum', 'vieta_prod', 'inequality', 'missing_param'][Math.floor(Math.random() * 8)];
+            difficulty = getDifficulty('quadratic', subType);
+
+            const p = generateQuadraticEquation();
+
+            // Signature based on equation parameters to detect duplicates
+            signature = `quad-${p.a}-${p.b}-${p.c}-${subType}`;
+
+            const eqString = `x^2 ${p.b >= 0 ? '+' : ''}${p.b === 0 ? '' : (p.b === 1 || p.b === -1 ? (p.b === 1 ? '' : '-') : p.b)}x ${p.c >= 0 ? '+' : ''}${p.c} = 0`;
+
+            if (subType === 'coeffs') {
+                q = {
+                    id: `${id}-coeffs`,
+                    type: 'question',
+                    inputType: 'coefficients',
+                    question: `**Határozd meg az egyenlet együtthatóit!**\n\n$$${eqString}$$\n\nMik az $a$, $b$ és $c$ értékei?`,
+                    correctAnswer: [p.a.toString(), p.b.toString(), p.c.toString()],
+                    successMessage: `Helyes! a=${p.a}, b=${p.b}, c=${p.c}.`,
+                    hint: 'Az $x^2$ előtti szám az "a" (ha nincs ott semmi, akkor 1), az $x$ előtti a "b", az önálló szám a "c". Figyelj az előjelekre!'
+                };
+            } else if (subType === 'discriminant') {
+                const D = (p.b * p.b) - (4 * p.a * p.c);
+                q = {
+                    id: `${id}-disc`,
+                    type: 'question',
+                    inputType: 'numeric',
+                    question: `**Mennyi az egyenlet diszkriminánsa?**\n\n$$${eqString}$$`,
+                    inputPrefix: 'D =',
+                    correctAnswer: D.toString(),
+                    successMessage: 'Helyes!',
+                    hint: 'D = b^2 - 4ac'
+                };
+            } else if (subType === 'num_roots') {
+                const D = (p.b * p.b) - (4 * p.a * p.c);
+                const count = D > 0 ? 2 : (D === 0 ? 1 : 0);
+                q = {
+                    id: `${id}-nroots`,
+                    type: 'question',
+                    inputType: 'multiple-choice',
+                    question: `**Hány valós megoldása van az egyenletnek?**\n\n$$${eqString}$$`,
+                    options: ['0', '1', '2'],
+                    correctAnswer: count.toString(),
+                    successMessage: 'Helyes! A diszkrimináns előjele dönt.',
+                    hint: 'Számold ki a diszkriminánst! (D > 0: 2, D = 0: 1, D < 0: 0)'
+                };
+            } else if (subType === 'vieta_sum') {
+                const sum = -p.b / p.a;
+                q = {
+                    id: `${id}-vsum`,
+                    type: 'question',
+                    inputType: 'numeric',
+                    question: `**Mennyi a gyökök összege?**\n(Viète-formulák)\n\n$$${eqString}$$`,
+                    inputPrefix: 'x1 + x2 =',
+                    correctAnswer: sum.toString(),
+                    successMessage: 'Helyes! x1 + x2 = -b/a.',
+                    hint: 'A gyökök összege: -b/a'
+                };
+            } else if (subType === 'vieta_prod') {
+                const prod = p.c / p.a;
+                q = {
+                    id: `${id}-vprod`,
+                    type: 'question',
+                    inputType: 'numeric',
+                    question: `**Mennyi a gyökök szorzata?**\n(Viète-formulák)\n\n$$${eqString}$$`,
+                    inputPrefix: 'x1 * x2 =',
+                    correctAnswer: prod.toString(),
+                    successMessage: 'Helyes! x1 * x2 = c/a.',
+                    hint: 'A gyökök szorzata: c/a'
+                };
+            } else if (subType === 'inequality') {
+                // Generate inequality question: x^2 + bx + c < 0 OR > 0
+                // We assume a=1 (opens up)
+                const isLessThan = Math.random() > 0.5; // < 0 vs > 0
+                const roots = [p.x1, p.x2].sort((a, b) => a - b);
+
+                // Construct the interval string options
+                // If < 0 (below axis): x must be BETWEEN roots (x1 < x < x2)
+                // If > 0 (above axis): x is OUTSIDE roots (x < x1 OR x > x2)
+
+                const correctOption = isLessThan
+                    ? `${roots[0]} < x < ${roots[1]}`
+                    : `x < ${roots[0]} vagy x > ${roots[1]}`;
+
+                // Generate distractors
+                const wrong1 = !isLessThan
+                    ? `${roots[0]} < x < ${roots[1]}`
+                    : `x < ${roots[0]} vagy x > ${roots[1]}`;
+
+                // Distractor with swapped roots or sign error (if feasible)
+                // Usually just flip the relation
+                const wrong2 = isLessThan
+                    ? `x < ${roots[0]}` // Partial/wrong
+                    : `x > ${roots[1]}`;
+
+                // SVG Diagram Generation
+                // Plot parabola y = x^2 + bx + c
+                // Viewbox needs to cover roots and vertex.
+                const vx = -p.b / 2;
+                const vy = p.c - (p.b * p.b) / 4;
+
+                // X range: roots +/- 2
+                const minX = Math.min(roots[0], vx) - 2;
+                const maxX = Math.max(roots[1], vx) + 2;
+                // Y range: vertex to some positive value
+                const minY = Math.min(vy, 0) - 2;
+                const maxY = Math.max(vy, 0) + 5; // allow seeing arms go up
+
+                const width = 300;
+                const height = 200;
+
+                // Map logical to SVG coords
+                const mapX = (x: number) => ((x - minX) / (maxX - minX)) * width;
+                const mapY = (y: number) => height - ((y - minY) / (maxY - minY)) * height; // Flip Y for SVG
+
+                // Generate Path data
+                let d = `M ${mapX(minX)} ${mapY(minX * minX + p.b * minX + p.c)}`;
+                for (let x = minX; x <= maxX; x += 0.1) {
+                    const y = x * x + p.b * x + p.c;
+                    d += ` L ${mapX(x)} ${mapY(y)}`;
+                }
+
+                const svgContent = `
+                <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto bg-white rounded-lg border border-slate-200 mx-auto max-w-sm">
+                    <!-- Axis -->
+                    <line x1="0" y1="${mapY(0)}" x2="${width}" y2="${mapY(0)}" stroke="#94a3b8" stroke-width="1" />
+                    <line x1="${mapX(0)}" y1="0" x2="${mapX(0)}" y2="${height}" stroke="#94a3b8" stroke-width="1" />
+                    
+                    <!-- Parabola -->
+                    <path d="${d}" fill="none" stroke="#6366f1" stroke-width="2" />
+                    
+                    <!-- Roots -->
+                    <circle cx="${mapX(roots[0])}" cy="${mapY(0)}" r="3" fill="#ef4444" />
+                    <text x="${mapX(roots[0])}" y="${mapY(0) + 15}" text-anchor="middle" font-size="10" fill="#64748b">${roots[0]}</text>
+                    
+                    <circle cx="${mapX(roots[1])}" cy="${mapY(0)}" r="3" fill="#ef4444" />
+                    <text x="${mapX(roots[1])}" y="${mapY(0) + 15}" text-anchor="middle" font-size="10" fill="#64748b">${roots[1]}</text>
+                    
+                    <!-- Region Highlight? Optional -->
+                </svg>`;
+
+                q = {
+                    id: `${id}-ineq`,
+                    type: 'question',
+                    inputType: 'multiple-choice',
+                    question: `**Oldd meg az egyenlőtlenséget!**\n\n$$x^2 ${p.b >= 0 ? '+' : ''}${p.b}x ${p.c >= 0 ? '+' : ''}${p.c} ${isLessThan ? '<' : '>'} 0$$\n\nOlvasd le az ábráról, hol ` + (isLessThan ? "negatív (tengely alatti)" : "pozitív (tengely feletti)") + " a függvény!",
+                    illustration: svgContent,
+                    options: [correctOption, wrong1, wrong2].sort(() => Math.random() - 0.5),
+                    correctAnswer: correctOption,
+                    successMessage: isLessThan
+                        ? 'Helyes! Mivel a parabola "mosolyog" (a > 0), a tengely alatti rész a két gyök között van.'
+                        : 'Helyes! Mivel a parabola "mosolyog" (a > 0), a tengely feletti rész a gyökökön kívül esik.',
+                    hint: isLessThan
+                        ? 'Keresd a két zöld pötty KÖZÖTTI részt!'
+                        : 'Keresd a két zöld pöttyön KÍVÜLI részeket!'
+                };
+
+            } else if (subType === 'missing_param') {
+                // "One root is X, find parameter b/c"
+                // We have p.x1 (root)
+                // If hide 'b': x^2 + bx + c = 0. We know x1. x1^2 + b*x1 + c = 0 => b = -(x1^2 + c)/x1
+                // Wait, random generation guarantees integer roots, so coefficients are consistent.
+                // We just verify logic.
+
+                const hideB = Math.random() > 0.5;
+                const root = p.x1; // Give x1
+
+                if (hideB) {
+                    q = {
+                        id: `${id}-param-b`,
+                        type: 'question',
+                        inputType: 'numeric',
+                        question: `**Határozd meg a 'b' paraméter értékét!**\n\nTudjuk, hogy az alábbi egyenlet egyik gyöke **x = ${root}**:\n\n$$x^2 + bx ${p.c >= 0 ? '+' : ''}${p.c} = 0$$`,
+                        inputPrefix: 'b =',
+                        correctAnswer: p.b.toString(),
+                        successMessage: 'Helyes! Behelyettesítve a gyököt, megkapjuk b értékét.',
+                        hint: `Helyettesítsd be az x=${root} értéket az egyenletbe, majd rendezd 'b'-re!`
+                    };
+                } else {
+                    // Hide C
+                    q = {
+                        id: `${id}-param-c`,
+                        type: 'question',
+                        inputType: 'numeric',
+                        question: `**Határozd meg a 'c' paraméter értékét!**\n\nTudjuk, hogy az alábbi egyenlet egyik gyöke **x = ${root}**:\n\n$$x^2 ${p.b >= 0 ? '+' : ''}${p.b}x + c = 0$$`,
+                        inputPrefix: 'c =',
+                        correctAnswer: p.c.toString(),
+                        successMessage: 'Helyes! Viète-formulákkal vagy behelyettesítéssel is kijön.',
+                        hint: `Helyettesítsd be az x=${root} értéket az egyenletbe, majd rendezd 'c'-re!`
+                    };
+                }
+
+            } else {
+                difficulty = 3;
+                q = {
+                    id: `${id}-root`,
+                    type: 'question',
+                    inputType: 'roots-set',
+                    question: `**Oldd meg az egyenletet!**\n\n$$${eqString}$$`,
+                    correctAnswer: [p.x1.toString(), p.x2.toString()],
+                    successMessage: 'Helyes!',
+                    hint: 'Használd a megoldóképletet!'
+                };
+            }
+        } else if (topic === 'coord_geometry') {
+            // Mix of Read and Plot
+            if (Math.random() > 0.5) {
+                difficulty = getDifficulty('coord_geometry', 'read');
+                q = generateCoordinateReadProblem(id);
+                // Create a signature for coord problems
+                if (q.diagramConfig?.points?.[0]) {
+                    const p = q.diagramConfig.points[0];
+                    signature = `coord-read-${p.x}-${p.y}`;
+                }
+            } else {
+                difficulty = getDifficulty('coord_geometry', 'plot');
+                q = generateCoordinatePlotProblem(id);
+                if (q.targetCoordinate) {
+                    signature = `coord-plot-${q.targetCoordinate.x}-${q.targetCoordinate.y}`;
+                }
+            }
+        } else if (topic === 'functions') {
+            // Mapping or Linear Plot
+            if (Math.random() > 0.5) {
+                difficulty = getDifficulty('functions', 'mapping');
+                q = generateMappingProblem(id);
+                signature = `mapping-${q.correctAnswer}`;
+            } else {
+                q = generateLinearPlotProblem(id);
+                // Check if it's integer or fraction for difficulty
+                const subType = q.targetLine.m % 1 === 0 ? 'linear_int' : 'linear_frac';
+                difficulty = getDifficulty('functions', subType);
+                if (q.targetLine) {
+                    signature = `linear-${q.targetLine.m}-${q.targetLine.b}`;
+                }
+            }
+        } else {
+            // Fallback for unknown/unimplemented topics (or 'linear', 'sets' etc if selected but not handled)
+            // For now, let's just generate a simple arithmetic placeholder or fallback to quadratic?
+            // Let's fallback to quadratic to ensure we always have content.
+            // Or better: log warning and skip? 
+            // Let's default to quadratic if nothing matches, but we should handle this in UI (disable unavailable).
+            // For now, let's default to 'quadratic' logic if fell through.
+            const subType = Math.random() > 0.3 ? 'roots' : 'discriminant';
+            const p = generateQuadraticEquation();
+            signature = `quad-${p.a}-${p.b}-${p.c}-${subType}`;
+            if (subType === 'discriminant') {
+                const D = (p.b * p.b) - (4 * p.a * p.c);
+                q = {
+                    id: `${id}-disc`,
+                    type: 'question',
+                    inputType: 'numeric',
+                    question: `**Mennyi az egyenlet diszkriminánsa?**\n\n$$x^2 ${p.b >= 0 ? '+' : ''}${p.b}x ${p.c >= 0 ? '+' : ''}${p.c} = 0$$`,
+                    inputPrefix: 'D =',
+                    correctAnswer: D.toString(),
+                    successMessage: 'Helyes!',
+                    hint: 'D = b^2 - 4ac'
+                };
+            } else {
+                q = {
+                    id: `${id}-root`,
+                    type: 'question',
+                    inputType: 'roots-set',
+                    question: `**Oldd meg az egyenletet!**\n\n$$x^2 ${p.b >= 0 ? '+' : ''}${p.b}x ${p.c >= 0 ? '+' : ''}${p.c} = 0$$`,
+                    correctAnswer: [p.x1.toString(), p.x2.toString()],
+                    successMessage: 'Helyes!',
+                    hint: 'Használd a megoldóképletet!'
+                };
+            }
+        }
+
+        // Check for duplicates
+        if (q && !generatedSignatures.has(signature)) {
+            generatedSignatures.add(signature);
+            // Add difficulty tag
+            q.difficulty = difficulty;
+            questions.push(q);
+        }
+    }
+
+    return questions;
 };

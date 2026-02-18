@@ -5,6 +5,8 @@ import { linearFunctionsCurriculum } from './modules/analysis/linear_functions';
 import { functionBasicsCurriculum } from './modules/analysis/function_basics';
 
 import { numberFunctionsCurriculum } from './modules/analysis/number_functions';
+import { circleBasicsCurriculum } from './modules/geometry/circle_basics';
+import { circleFormulasCurriculum } from './modules/geometry/circle_formulas';
 
 // Type for the registry mapping
 export type CurriculumRegistry = {
@@ -15,5 +17,6 @@ export type CurriculumRegistry = {
 export const curriculumRegistry: CurriculumRegistry = {
     'quadratic': quadraticCurriculum,
     'functions': [...coordinateSystemCurriculum, ...functionBasicsCurriculum, ...numberFunctionsCurriculum, ...linearFunctionsCurriculum],
+    'circle': [...circleBasicsCurriculum, ...circleFormulasCurriculum],
     // Add new modules here
 };

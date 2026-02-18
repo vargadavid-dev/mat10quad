@@ -3,6 +3,7 @@ import { CurriculumItem } from '../../../types';
 export const numberFunctionsCurriculum: CurriculumItem[] = [
     // --- 3. SZÁMFÜGGVÉNYEK ---
     {
+        chapter: 'Valós függvények',
         id: 'num-func-intro',
         type: 'theory',
         title: '3. Valós számokon értelmezett függvények',
@@ -26,6 +27,7 @@ export const numberFunctionsCurriculum: CurriculumItem[] = [
 
     // --- MEGADÁSI MÓDOK ---
     {
+        chapter: 'Valós függvények',
         id: 'num-func-repr',
         type: 'theory',
         title: 'Megadási módok',
@@ -46,6 +48,7 @@ export const numberFunctionsCurriculum: CurriculumItem[] = [
 
     // --- ÉRTÉKTÁBLÁZAT GYAKORLÁS 1 ---
     {
+        chapter: 'Valós függvények',
         id: 'value-table-1',
         type: 'question',
         inputType: 'key-value',
@@ -67,6 +70,7 @@ export const numberFunctionsCurriculum: CurriculumItem[] = [
 
     // --- ÉRTÉKTÁBLÁZAT GYAKORLÁS 2 (NEGATÍVOKKAL) ---
     {
+        chapter: 'Valós függvények',
         id: 'value-table-2',
         type: 'question',
         inputType: 'key-value',
@@ -87,6 +91,7 @@ export const numberFunctionsCurriculum: CurriculumItem[] = [
 
     // --- ÁBRÁZOLÁSI ÁTMENET ---
     {
+        chapter: 'Valós függvények',
         id: 'table-to-graph-intro',
         type: 'theory',
         title: 'Táblázatból Grafikon',
@@ -102,6 +107,7 @@ export const numberFunctionsCurriculum: CurriculumItem[] = [
 
     // --- ÉRTÉKTÁBLÁZAT ÉS ÁBRÁZOLÁS: f(x) = x - 2 ---
     {
+        chapter: 'Valós függvények',
         id: 'value-table-3',
         type: 'question',
         inputType: 'key-value',
@@ -123,6 +129,7 @@ export const numberFunctionsCurriculum: CurriculumItem[] = [
         successMessage: 'Helyes! Most pedig ábrázoljuk ezeket a pontokat.'
     },
     {
+        chapter: 'Valós függvények',
         id: 'plot-points-1',
         type: 'question',
         inputType: 'coordinate-plot',
@@ -143,5 +150,45 @@ export const numberFunctionsCurriculum: CurriculumItem[] = [
         maxPoints: 5,
         hint: 'Keresd meg a párokat: pl. x=-2 és y=-4 metszéspontját.',
         successMessage: 'Szép munka! Látod? A pontok egy egyenesre illeszkednek.'
+    },
+
+    // --- FEJEZET KVÍZ ---
+    {
+        chapter: 'Valós függvények',
+        id: 'quiz-number-functions',
+        type: 'quiz',
+        title: 'Összefoglaló kvíz (opcionális)',
+        description: 'Nem kötelező, de segít rögzíteni a tanultakat. Ellenőrizd, mennyire érted a képletes függvényeket!',
+        minScoreToPass: 2,
+        questions: [
+            {
+                question: 'Mit jelent az $f(3)$ jelölés?',
+                inputType: 'multiple-choice',
+                options: ['A függvény értéke, ha $x = 3$', 'A függvény 3-szorosa', 'A függvény 3. pontja'],
+                correctAnswer: 'A függvény értéke, ha $x = 3$',
+                hint: 'Olvasd így: "f hármon".'
+            },
+            {
+                question: 'Ha $f(x) = 2x + 1$, mennyi $f(0)$?',
+                inputType: 'multiple-choice',
+                options: ['1', '0', '2'],
+                correctAnswer: '1',
+                hint: 'Helyettesíts: $2 \\cdot 0 + 1 = ?$'
+            },
+            {
+                question: 'Az értéktáblázatban mit tartalmaz egy sor?',
+                inputType: 'multiple-choice',
+                options: ['Egy $(x; y)$ párt', 'Csak $x$ értékeket', 'A képletet'],
+                correctAnswer: 'Egy $(x; y)$ párt',
+                hint: 'Minden sor egy pont a grafikonon.'
+            },
+            {
+                question: 'Ha $f(x) = 3x - 5$, mennyi $f(2)$?',
+                inputType: 'numeric',
+                inputPrefix: '$f(2) =$',
+                correctAnswer: '1',
+                hint: '$3 \\cdot 2 - 5 = 6 - 5 = ?$'
+            }
+        ]
     }
 ];

@@ -3,15 +3,30 @@ import { curriculumRegistry } from './data/registry';
 import { categories } from './data/category_definitions';
 import TheoryBlock from './components/TheoryBlock';
 import QuestionBlock from './components/QuestionBlock';
-import { BookOpen, GraduationCap, Menu, Lock, X, ChevronRight, Settings, Trophy, RotateCcw, PartyPopper, Scan, Moon, Sun } from 'lucide-react';
+import QuizBlock from './components/QuizBlock';
+import { BookOpen, GraduationCap, Menu, Lock, X, ChevronRight, Settings, Trophy, RotateCcw, PartyPopper, Scan, Moon, Sun, Rocket } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import FunctionPlotter from './components/FunctionPlotter';
 import Dashboard from './components/Dashboard';
 import Breadcrumb from './components/Breadcrumb';
 import { generateQuadraticEquation, generateQuadraticSequence, generateCoordinateReadProblem, generateCoordinatePlotProblem, generateLinearPlotProblem, generateMappingProblem } from './utils/QuestionGenerator';
+import GameArena from './components/arena/GameArena';
+import KnowledgeBase from './components/knowledge/KnowledgeBase';
+import CertificateVerifier from './components/CertificateVerifier';
 
 const App: React.FC = () => {
-  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+  const [activeCourseId, setActiveCourseId] = useState<string | null>(() => {
+    return sessionStorage.getItem('activeCourseId') || null;
+  });
+
+  // Persist activeCourseId to sessionStorage
+  useEffect(() => {
+    if (activeCourseId) {
+      sessionStorage.setItem('activeCourseId', activeCourseId);
+    } else {
+      sessionStorage.removeItem('activeCourseId');
+    }
+  }, [activeCourseId]);
   const [currData, setCurrData] = useState(curriculumRegistry['quadratic']); // Default to quadratic
 
   useEffect(() => {
@@ -206,10 +221,32 @@ const App: React.FC = () => {
 
   const progressPercentage = Math.round(((activeBlockIndex) / currData.length) * 100);
 
-  // Extract chapters from curriculum (theory blocks with numbered titles)
-  const chapters = currData
-    .map((item, index) => ({ item, index }))
-    .filter(({ item }) => item.type === 'theory' && item.title && /^\d+\./.test(item.title));
+  // Extract chapters from curriculum
+  // If items have a `chapter` field, group by chapter name (one entry per unique chapter).
+  // Otherwise, fall back to treating each numbered theory block as a chapter.
+  const chapters = (() => {
+    const hasChapterField = currData.some(item => item.chapter);
+    if (hasChapterField) {
+      const seen = new Set<string>();
+      return currData
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => {
+          if (item.chapter && !seen.has(item.chapter)) {
+            seen.add(item.chapter);
+            return true;
+          }
+          return false;
+        })
+        .map(({ item, index }) => ({
+          item: { ...item, title: item.chapter },
+          index,
+        }));
+    }
+    // Fallback: numbered theory blocks
+    return currData
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.type === 'theory' && item.title && /^\d+\./.test(item.title));
+  })();
 
   const handleChapterClick = (blockIndex: number, blockId: string) => {
     // Always allow navigation
@@ -227,7 +264,40 @@ const App: React.FC = () => {
 
   // Render Dashboard if no course is selected
   if (!activeCourseId) {
-    return <Dashboard onSelectCourse={setActiveCourseId} />;
+    return (
+      <Dashboard
+        onSelectCourse={setActiveCourseId}
+        isDarkMode={isDarkMode}
+        onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+      />
+    );
+  }
+
+  // Render Game Arena if selected
+  if (activeCourseId === 'ARENA') {
+    return <GameArena onBack={() => setActiveCourseId(null)} />;
+  }
+
+  // Render Knowledge Base if selected
+  if (activeCourseId === 'KNOWLEDGE_BASE') {
+    return <KnowledgeBase onBack={() => setActiveCourseId(null)} />;
+  }
+
+  // Render Certificate Verifier if selected
+  if (activeCourseId === 'VERIFY_CERTIFICATE') {
+    return (
+      <div className={`min-h-screen ${isDarkMode ? 'dark bg-slate-900' : 'bg-gradient-to-br from-slate-50 to-blue-50'} transition-colors duration-300`}>
+        <div className="max-w-4xl mx-auto py-12 px-4">
+          <button
+            onClick={() => setActiveCourseId(null)}
+            className="mb-6 flex items-center gap-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+          >
+            ← Vissza a főoldalra
+          </button>
+          <CertificateVerifier />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -264,17 +334,17 @@ const App: React.FC = () => {
                 </button>
                 <div
                   onClick={handleSecretDevToggle}
-                  className="flex items-center justify-center w-10 h-10 bg-indigo-600 rounded-lg text-white shrink-0 cursor-pointer select-none active:scale-95 transition-transform"
-                  title="Matematika"
+                  className="flex items-center justify-center w-10 h-10 bg-indigo-600 rounded-lg text-white shrink-0 cursor-pointer select-none active:scale-95 transition-transform shadow-lg shadow-indigo-200 hover:shadow-indigo-300"
+                  title="Matekverzum"
                 >
-                  <GraduationCap size={24} />
+                  <Rocket size={24} className="animate-pulse-slow" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-slate-800 leading-tight md:text-xl hidden sm:block">
-                    Matematika
+                  <h1 className="text-lg font-bold text-slate-800 dark:text-white leading-tight md:text-xl hidden sm:block flex items-center gap-2">
+                    Matekverzum <span className="text-xs font-normal text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/50 px-2 py-0.5 rounded-full">BÉTA</span>
                   </h1>
-                  <p className="text-sm font-bold text-slate-800 sm:hidden">Matematika</p>
-                  <p className="text-xs text-slate-500 font-medium hidden sm:block">Másodfokú és Gyökös Egyenletek</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-white sm:hidden">Matekverzum</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-300 font-medium hidden sm:block">Lépésről lépésre a csillagokig</p>
                 </div>
               </div>
 
@@ -309,33 +379,39 @@ const App: React.FC = () => {
                 <div className="max-w-3xl mx-auto p-4">
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Fejezetek</h3>
                   <div className="grid gap-2">
-                    {chapters.map((chap, i) => {
-                      const isUnlocked = true; // Always unlocked
-                      const isCurrent = activeBlockIndex >= chap.index &&
-                        (i === chapters.length - 1 || activeBlockIndex < chapters[i + 1].index);
+                    {(() => {
+                      let lastChapter: string | undefined = undefined;
+                      return chapters.map((chap, i) => {
+                        const isCurrent = activeBlockIndex >= chap.index &&
+                          (i === chapters.length - 1 || activeBlockIndex < chapters[i + 1].index);
+                        const currentChapter = chap.item.chapter;
+                        const showChapterHeader = currentChapter && currentChapter !== lastChapter;
+                        lastChapter = currentChapter;
 
-                      return (
-                        <button
-                          key={chap.item.id}
-                          onClick={() => handleChapterClick(chap.index, chap.item.id)}
-                          className={`flex items-center justify-between p-3 rounded-lg border text-left transition-all ${isCurrent
-                            ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500'
-                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                            }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${isCurrent ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700'
-                              }`}>
-                              {i + 1}
-                            </span>
-                            <span className="font-medium text-slate-800">
-                              {chap.item.title}
-                            </span>
-                          </div>
-                          {isCurrent && <ChevronRight size={16} className="text-indigo-500" />}
-                        </button>
-                      );
-                    })}
+                        return (
+                          <React.Fragment key={chap.item.id}>
+                            <button
+                              onClick={() => handleChapterClick(chap.index, chap.item.id)}
+                              className={`flex items-center justify-between p-3 rounded-lg border text-left transition-all ${isCurrent
+                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-500'
+                                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${isCurrent ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                                  }`}>
+                                  {i + 1}
+                                </span>
+                                <span className="font-medium text-slate-800 dark:text-slate-200">
+                                  {chap.item.title}
+                                </span>
+                              </div>
+                              {isCurrent && <ChevronRight size={16} className="text-indigo-500" />}
+                            </button>
+                          </React.Fragment>
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
                 {/* Backdrop click to close */}
@@ -376,6 +452,15 @@ const App: React.FC = () => {
                     onComplete={handleBlockComplete}
                   />
                 );
+              } else if (item.type === 'quiz') {
+                return (
+                  <QuizBlock
+                    key={item.id}
+                    data={item}
+                    isCompleted={isCompleted || (index === activeBlockIndex && isCourseFinished)}
+                    onComplete={handleBlockComplete}
+                  />
+                );
               } else {
                 return (
                   <QuestionBlock
@@ -394,6 +479,19 @@ const App: React.FC = () => {
           <div ref={scrollRef} className="h-4" />
 
         </main>
+
+        {/* Footer */}
+        {!focusMode && (
+          <footer className="py-6 text-center text-slate-400 text-sm">
+            <p>
+              &copy; {new Date().getFullYear()} <span className="font-bold text-slate-500">Matekverzum</span>
+            </p>
+            <p className="mt-1 flex items-center justify-center gap-1">
+              Készítette: <span className="text-indigo-400 font-medium">Varga Dávid</span>
+              <span className="text-xs bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded ml-1">v1.0</span>
+            </p>
+          </footer>
+        )}
 
         {/* Chapter Completed Toast */}
         {
@@ -482,11 +580,23 @@ const App: React.FC = () => {
                   setIsCourseFinished(false);
                 }}
               >
-                {currData.map((item, idx) => (
-                  <option key={item.id} value={idx}>
-                    {idx + 1}. {item.id}
-                  </option>
-                ))}
+                {currData.map((item, idx) => {
+                  let label = item.id;
+                  if (item.type === 'theory' && item.title) {
+                    label = `📖 ${item.title}`;
+                  } else if (item.type === 'question') {
+                    const qText = item.question ? item.question.replace(/\*\*/g, '').substring(0, 20) + '...' : 'Ismeretlen';
+                    label = `❓ Feladat: ${qText}`;
+                  } else if (item.type === 'quiz') {
+                    label = `📝 Kvíz: ${item.title || 'Záró dolgozat'}`;
+                  }
+
+                  return (
+                    <option key={item.id} value={idx}>
+                      {idx + 1}. {label}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>

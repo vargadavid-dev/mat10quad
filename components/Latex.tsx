@@ -20,10 +20,10 @@ const Latex: React.FC<LatexProps> = ({ children, block = false }) => {
   }, [children, block]);
 
   if (html === null) {
-    return <span>{children}</span>;
+    return <span className="text-slate-900 dark:text-slate-100">{children}</span>;
   }
 
-  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  return <span className="text-slate-900 dark:text-slate-100" dangerouslySetInnerHTML={{ __html: html }} />;
 };
 
 export default Latex;
