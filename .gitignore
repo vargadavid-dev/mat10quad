@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Temporaries & backups
+.vite/
+*.pdf
+*.bak
+*_backup.ts

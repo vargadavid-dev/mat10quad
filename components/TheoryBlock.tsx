@@ -3,11 +3,13 @@ import { TheoryBlockData } from '../types';
 import Latex from './Latex';
 import CoordinateSystem from './CoordinateSystem';
 import CircleAngleVisualizer from './geometry/CircleAngleVisualizer';
+import ViewingAngleVisualizer from './geometry/ViewingAngleVisualizer';
 import CircleBasicsVisualizer from './geometry/CircleBasicsVisualizer';
 import CircleLinesVisualizer from './geometry/CircleLinesVisualizer';
 import CirclePartsVisualizer from './geometry/CirclePartsVisualizer';
 import CircleFormulasVisualizer from './geometry/CircleFormulasVisualizer';
 import ThalesVisualizer from './geometry/ThalesVisualizer';
+import ViewingAngleConstruction from './geometry/ViewingAngleConstruction';
 
 interface Props {
   data: TheoryBlockData;
@@ -170,6 +172,10 @@ const TheoryBlock: React.FC<Props> = ({ data, onComplete, isCompleted }) => {
           elements.push(<div key={`interactive-${i}`} className="my-6"><CircleFormulasVisualizer /></div>);
         } else if (type === 'ThalesVisualizer') {
           elements.push(<div key={`interactive-${i}`} className="my-6"><ThalesVisualizer /></div>);
+        } else if (type === 'ViewingAngleConstruction') {
+          elements.push(<div key={`interactive-${i}`} className="my-6"><ViewingAngleConstruction /></div>);
+        } else if (type === 'ViewingAngleVisualizer') {
+          elements.push(<div key={`interactive-${i}`} className="my-6"><ViewingAngleVisualizer /></div>);
         }
         return;
       }
@@ -284,6 +290,12 @@ const TheoryBlock: React.FC<Props> = ({ data, onComplete, isCompleted }) => {
             <div className="max-w-none">
               {renderStructuredContent(data.content)}
             </div>
+
+            {data.interactiveAnimation && (
+              <div className="mt-8 animate-fade-in">
+                {data.interactiveAnimation}
+              </div>
+            )}
 
             {/* Illustration Area */}
             {(data.diagramConfig || data.illustration) && (

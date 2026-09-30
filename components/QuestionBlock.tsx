@@ -85,38 +85,42 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
   // Helper to render inline elements: LaTeX, Bold, and Italic
   const renderInline = (text: string) => {
     if (!text) return null; // Safe guard
-    const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g);
-    return parts.map((part, index) => {
-      if (part.startsWith('$$') && part.endsWith('$$')) {
-        return <Latex key={index} block>{part.slice(2, -2)}</Latex>;
-      } else if (part.startsWith('$') && part.endsWith('$')) {
-        return <Latex key={index}>{part.slice(1, -1)}</Latex>;
+
+    // First, split by Bold (**...**)
+    const boldParts = text.split(/(\*\*[\s\S]*?\*\*)/g);
+
+    return boldParts.map((boldPart, boldIndex) => {
+      const isBold = boldPart.startsWith('**') && boldPart.endsWith('**');
+      const textToProcess = isBold ? boldPart.slice(2, -2) : boldPart;
+
+      // Inside (or outside) bold, split by LaTeX ($$...$$ or $...$)
+      const latexParts = textToProcess.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g);
+
+      const renderedLatexParts = latexParts.map((latexPart, latexIndex) => {
+        if (latexPart.startsWith('$$') && latexPart.endsWith('$$')) {
+          return <Latex key={latexIndex} block>{latexPart.slice(2, -2)}</Latex>;
+        } else if (latexPart.startsWith('$') && latexPart.endsWith('$')) {
+          return <Latex key={latexIndex}>{latexPart.slice(1, -1)}</Latex>;
+        }
+
+        // Inside non-LaTeX parts, apply Italic (*...*)
+        const italicParts = latexPart.split(/(\*[^*]+?\*)/g);
+        return (
+          <React.Fragment key={latexIndex}>
+            {italicParts.map((italicPart, iIndex) => {
+              if (italicPart.startsWith('*') && italicPart.endsWith('*') && italicPart.length > 2) {
+                return <em key={iIndex} className="italic text-slate-600 dark:text-slate-400">{italicPart.slice(1, -1)}</em>;
+              }
+              return italicPart;
+            })}
+          </React.Fragment>
+        );
+      });
+
+      if (isBold) {
+        return <strong key={boldIndex} className="font-bold text-slate-900 dark:text-slate-100">{renderedLatexParts}</strong>;
       }
-
-      // Handle Bold (**text**)
-      const boldParts = part.split(/(\*\*.*?\*\*)/g);
-      return (
-        <span key={index}>
-          {boldParts.map((subPart, subIndex) => {
-            if (subPart.startsWith('**') && subPart.endsWith('**')) {
-              return <strong key={subIndex} className="font-bold text-slate-900 dark:text-slate-100">{subPart.slice(2, -2)}</strong>;
-            }
-
-            // Handle Italic (*text*) inside non-bold parts
-            const italicParts = subPart.split(/(\*[^*]+?\*)/g);
-            return (
-              <React.Fragment key={subIndex}>
-                {italicParts.map((italicPart, iIndex) => {
-                  if (italicPart.startsWith('*') && italicPart.endsWith('*') && italicPart.length > 2) {
-                    return <em key={iIndex} className="italic text-slate-600 dark:text-slate-400">{italicPart.slice(1, -1)}</em>;
-                  }
-                  return italicPart;
-                })}
-              </React.Fragment>
-            );
-          })}
-        </span>
-      );
+      return <React.Fragment key={boldIndex}>{renderedLatexParts}</React.Fragment>;
     });
   };
 
@@ -399,19 +403,29 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
 
           {effectiveData.inputType === 'multiple-choice' && effectiveData.options && (
             <div className={`grid gap-3 ${effectiveData.options.length <= 3 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
-              {effectiveData.options.map((opt, idx) => (
-                <button
-                  key={idx}
-                  disabled={!isInteractive}
-                  onClick={() => setSingleInput(opt)}
-                  className={`p-4 rounded-lg border-2 text-left transition-all text-lg ${singleInput === opt
-                    ? 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-200 font-medium ring-1 ring-indigo-400'
-                    : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
-                    } ${!isInteractive && singleInput !== opt ? 'opacity-50' : ''}`}
-                >
-                  {renderInline(opt)}
-                </button>
-              ))}
+              {effectiveData.options.map((opt, idx) => {
+                const isSelected = singleInput === opt;
+                let btnStyle = 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200';
+
+                if (isSelected) {
+                  if (isCompleted) {
+                    btnStyle = 'border-green-500 bg-green-100 dark:bg-green-900/60 text-green-800 dark:text-green-200 font-medium ring-1 ring-green-400';
+                  } else {
+                    btnStyle = 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-200 font-medium ring-1 ring-indigo-400';
+                  }
+                }
+
+                return (
+                  <button
+                    key={idx}
+                    disabled={!isInteractive}
+                    onClick={() => setSingleInput(opt)}
+                    className={`p-4 rounded-lg border-2 text-left transition-all text-lg ${btnStyle} ${!isInteractive && !isSelected ? 'opacity-50' : ''}`}
+                  >
+                    {renderInline(opt)}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -691,20 +705,34 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
             </button>
           </div>
         ) : (
-          <div className="mt-6 flex flex-wrap items-center gap-4">
-            <div className="animate-pop-in flex items-center gap-2 text-green-700 font-bold bg-green-100 p-4 rounded-lg border border-green-200 shadow-sm">
-              <CheckCircle2 className="w-6 h-6 animate-[bounce_1s_infinite]" />
-              Teljesítve
-            </div>
+          <div className="mt-6 flex flex-col gap-4">
+            {effectiveData.successMessage ? (
+              <div className="p-4 rounded-lg flex items-start gap-3 animate-pop-in border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 shadow-sm w-full">
+                <CheckCircle2 className="w-6 h-6 mt-0.5 shrink-0 text-green-600 dark:text-green-400" />
+                <div>
+                  <span className="font-bold block mb-1 text-lg text-green-700 dark:text-green-300">Teljesítve!</span>
+                  <span className="leading-relaxed">{renderInline(effectiveData.successMessage)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="animate-pop-in flex items-center gap-2 text-green-700 font-bold bg-green-100 p-4 rounded-lg border border-green-200 shadow-sm">
+                  <CheckCircle2 className="w-6 h-6" />
+                  Teljesítve
+                </div>
+              </div>
+            )}
 
             {onRegenerate && (
-              <button
-                onClick={onRegenerate}
-                className="animate-fade-in flex items-center gap-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-semibold py-3 px-5 rounded-lg transition-colors"
-              >
-                <Dices className="w-5 h-5" />
-                Még egyet kérek!
-              </button>
+              <div className="flex flex-wrap items-center gap-4">
+                <button
+                  onClick={onRegenerate}
+                  className="animate-fade-in flex items-center gap-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-semibold py-3 px-5 rounded-lg transition-colors"
+                >
+                  <Dices className="w-5 h-5" />
+                  Még egyet kérek!
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -725,7 +753,7 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
             )}
             <div>
               <span className="font-bold block mb-1 text-lg">
-                {feedback.type === 'success' ? 'Helyes!' : feedback.type === 'hint' ? (attempts >= 3 && data.explanation ? 'Magyarázat:' : 'Segítség:') : 'Hiba:'}
+                {feedback.type === 'success' ? 'Helyes!' : feedback.type === 'hint' ? (attempts >= 3 && effectiveData.explanation ? 'Magyarázat:' : 'Segítség:') : 'Hiba:'}
               </span>
               <span className="leading-relaxed">{renderInline(feedback.msg)}</span>
             </div>
@@ -733,7 +761,6 @@ const QuestionBlock: React.FC<Props> = ({ data, onComplete, isCompleted, onRegen
         )}
       </div>
     </div>
-
   );
 };
 

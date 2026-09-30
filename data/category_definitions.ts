@@ -36,6 +36,7 @@ export const categories: Category[] = [
         id: 'algebra',
         title: 'Algebra',
         subcategories: [
+            { id: 'factorization', title: 'Szorzattá alakítás', isAvailable: true },
             { id: 'quadratic', title: 'Másodfokú kifejezések', isAvailable: true },
             { id: 'linear', title: 'Egyenletek, egyenletrendszerek' },
             { id: 'inequalities', title: 'Egyenlőtlenségek' },

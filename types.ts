@@ -1,4 +1,6 @@
-export type BlockType = 'theory' | 'question' | 'quiz';
+import React from 'react';
+
+export type BlockType = 'theory' | 'question' | 'quiz' | 'custom';
 export type QuestionType = 'multiple-choice' | 'numeric' | 'roots-set' | 'coefficients' | 'matching' | 'quadratic-equation' | 'key-value' | 'coordinate-plot';
 
 export interface BaseBlock {
@@ -12,12 +14,18 @@ export interface TheoryBlockData extends BaseBlock {
   type: 'theory';
   content: string; // Supports LaTeX in $...$
   illustration?: string; // HTML/SVG string for diagrams
+  interactiveAnimation?: React.ReactNode; // Optional custom interactive component
   diagramConfig?: {
     type: 'coordinate-system';
     points?: { x: number; y: number; label?: string; color?: string; showGuides?: boolean }[];
     lines?: { x1: number; y1: number; x2: number; y2: number; color?: string; width?: number; style?: 'solid' | 'dashed'; label?: string; labelOffset?: { x: number; y: number } }[];
   };
   layout?: 'default' | 'side-by-side';
+}
+
+export interface CustomBlockData extends BaseBlock {
+  type: 'custom';
+  component: React.ReactNode;
 }
 
 export interface QuestionBlockData extends BaseBlock {
@@ -66,4 +74,4 @@ export interface QuizBlockData extends BaseBlock {
   isSummary?: boolean; // If true, certificate generation is available
 }
 
-export type CurriculumItem = TheoryBlockData | QuestionBlockData | QuizBlockData;
+export type CurriculumItem = TheoryBlockData | QuestionBlockData | QuizBlockData | CustomBlockData;

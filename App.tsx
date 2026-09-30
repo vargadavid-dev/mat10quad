@@ -375,7 +375,7 @@ const App: React.FC = () => {
 
             {/* Chapter Dropdown Menu */}
             {isMenuOpen && (
-              <div className="absolute top-full left-0 w-full bg-white shadow-xl animate-in slide-in-from-top-2 duration-200">
+              <div className="absolute top-full left-0 w-full bg-white dark:bg-slate-800 shadow-xl animate-in slide-in-from-top-2 duration-200 border-b border-slate-200 dark:border-slate-700">
                 <div className="max-w-3xl mx-auto p-4">
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Fejezetek</h3>
                   <div className="grid gap-2">
@@ -439,40 +439,66 @@ const App: React.FC = () => {
         {/* Main Content Area */}
         <main className="max-w-3xl mx-auto px-4 py-8">
           <div className="flex flex-col gap-6">
-            {currData.slice(0, activeBlockIndex + 1).map((item, index) => {
-              const isCompleted = index < activeBlockIndex;
+            {(() => {
+              // Find the start index of the current chapter
+              // We find the last chapter whose index is <= activeBlockIndex
+              const currentChapter = [...chapters].reverse().find(ch => ch.index <= activeBlockIndex);
+              const renderStartIndex = currentChapter ? currentChapter.index : 0;
 
-              // Render specific block type
-              if (item.type === 'theory') {
-                return (
-                  <TheoryBlock
-                    key={item.id}
-                    data={item}
-                    isCompleted={isCompleted}
-                    onComplete={handleBlockComplete}
-                  />
-                );
-              } else if (item.type === 'quiz') {
-                return (
-                  <QuizBlock
-                    key={item.id}
-                    data={item}
-                    isCompleted={isCompleted || (index === activeBlockIndex && isCourseFinished)}
-                    onComplete={handleBlockComplete}
-                  />
-                );
-              } else {
-                return (
-                  <QuestionBlock
-                    key={item.id}
-                    data={item}
-                    isCompleted={isCompleted || (index === activeBlockIndex && isCourseFinished)} // Keep completed styling if finished
-                    onComplete={handleBlockComplete}
-                    onRegenerate={item.onRegenerate ? () => handleRegenerate(index) : undefined}
-                  />
-                );
-              }
-            })}
+              return currData.slice(renderStartIndex, activeBlockIndex + 1).map((item, localIndex) => {
+                const globalIndex = renderStartIndex + localIndex;
+                const isCompleted = globalIndex < activeBlockIndex;
+
+                // Render specific block type
+                if (item.type === 'theory') {
+                  return (
+                    <TheoryBlock
+                      key={item.id}
+                      data={item}
+                      isCompleted={isCompleted}
+                      onComplete={handleBlockComplete}
+                    />
+                  );
+                } else if (item.type === 'quiz') {
+                  return (
+                    <QuizBlock
+                      key={item.id}
+                      data={item}
+                      isCompleted={isCompleted || (globalIndex === activeBlockIndex && isCourseFinished)}
+                      onComplete={handleBlockComplete}
+                    />
+                  );
+                } else if (item.type === 'custom') {
+                  return (
+                    <div key={item.id} className="animate-fade-in" id={item.id}>
+                      {item.component}
+
+                      {!isCompleted && (
+                        <div className="mt-6 border-t border-slate-200 dark:border-slate-700 pt-6">
+                          <button
+                            onClick={handleBlockComplete}
+                            className="w-full bg-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-lg"
+                          >
+                            <ChevronRight className="w-6 h-6" />
+                            Tovább
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                } else {
+                  return (
+                    <QuestionBlock
+                      key={item.id}
+                      data={item}
+                      isCompleted={isCompleted || (globalIndex === activeBlockIndex && isCourseFinished)} // Keep completed styling if finished
+                      onComplete={handleBlockComplete}
+                      onRegenerate={item.onRegenerate ? () => handleRegenerate(globalIndex) : undefined}
+                    />
+                  );
+                }
+              });
+            })()}
           </div>
 
           {/* Invisible element for scroll targeting */}
