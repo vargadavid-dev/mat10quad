@@ -9,6 +9,7 @@ import { numberFunctionsCurriculum } from './modules/analysis/number_functions';
 import { circleBasicsCurriculum } from './modules/geometry/circle_basics';
 import { circleFormulasCurriculum } from './modules/geometry/circle_formulas';
 import { centralAnglesCurriculum } from './modules/geometry/central_angles';
+import { pythagorasCurriculum } from './modules/geometry/pythagoras_sample';
 
 // Type for the registry mapping
 export type CurriculumRegistry = {
@@ -17,6 +18,7 @@ export type CurriculumRegistry = {
 
 // The central registry
 export const curriculumRegistry: CurriculumRegistry = {
+    'pythagoras': pythagorasCurriculum,
     'factorization': factorizationCurriculum,
     'quadratic': quadraticCurriculum,
     'functions': [...coordinateSystemCurriculum, ...functionBasicsCurriculum, ...numberFunctionsCurriculum, ...linearFunctionsCurriculum],

@@ -9,6 +9,26 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onSelectCourse, isDarkMode, onToggleTheme }) => {
+    const arenaClickTimesRef = React.useRef<number[]>([]);
+
+    const handleArenaClick = () => {
+        const now = Date.now();
+        const times = arenaClickTimesRef.current;
+
+        // Reset ha az utolsó kattintás óta több mint 600ms telt el
+        if (times.length > 0 && now - times[times.length - 1] > 600) {
+            arenaClickTimesRef.current = [now];
+            return;
+        }
+
+        times.push(now);
+
+        // 5 egymást követő gyors kattintás esetén megnyitás
+        if (times.length >= 5) {
+            arenaClickTimesRef.current = [];
+            onSelectCourse('ARENA');
+        }
+    };
 
     const getIcon = (id: string) => {
         switch (id) {
@@ -63,8 +83,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectCourse, isDarkMode, onTog
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                     {/* Arena Card */}
                     <div
-                        onClick={() => alert("A Közös Aréna jelenleg fejlesztés alatt áll. Hamarosan érkezik!")}
-                        className="bg-slate-200 dark:bg-slate-800 rounded-2xl p-6 text-slate-500 dark:text-slate-400 shadow-sm cursor-not-allowed relative overflow-hidden group grayscale"
+                        onClick={handleArenaClick}
+                        className="bg-slate-200 dark:bg-slate-800 rounded-2xl p-6 text-slate-500 dark:text-slate-400 shadow-sm cursor-not-allowed relative overflow-hidden group grayscale select-none"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-10 transform translate-x-10 -translate-y-10">
                             <Gamepad2 size={120} />

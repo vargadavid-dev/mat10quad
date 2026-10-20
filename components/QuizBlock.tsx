@@ -33,37 +33,43 @@ const QuizBlock: React.FC<QuizBlockProps> = ({ data, onComplete, isCompleted }) 
 
     // Helper to render inline LaTeX, Bold, Italic
     const renderInline = (text: string) => {
-        const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g);
-        return parts.map((part, index) => {
-            if (part.startsWith('$$') && part.endsWith('$$')) {
-                return <Latex key={index} block>{part.slice(2, -2)}</Latex>;
-            } else if (part.startsWith('$') && part.endsWith('$')) {
-                return <Latex key={index}>{part.slice(1, -1)}</Latex>;
-            }
+        if (!text) return null;
 
-            // Handle Bold (**text**)
-            const boldParts = part.split(/(\*\*.*?\*\*)/g);
-            return (
-                <span key={index}>
-                    {boldParts.map((subPart, subIndex) => {
-                        if (subPart.startsWith('**') && subPart.endsWith('**')) {
-                            return <strong key={subIndex} className="font-bold">{subPart.slice(2, -2)}</strong>;
-                        }
-                        // Handle Italic (*text*)
-                        const italicParts = subPart.split(/(\*[^*]+?\*)/g);
-                        return (
-                            <React.Fragment key={subIndex}>
-                                {italicParts.map((iPart, iIdx) => {
-                                    if (iPart.startsWith('*') && iPart.endsWith('*') && iPart.length > 2) {
-                                        return <em key={iIdx} className="italic text-slate-500">{iPart.slice(1, -1)}</em>;
-                                    }
-                                    return iPart;
-                                })}
-                            </React.Fragment>
-                        );
-                    })}
-                </span>
-            );
+        // First, split by Bold (**...**)
+        const boldParts = text.split(/(\*\*[\s\S]*?\*\*)/g);
+
+        return boldParts.map((boldPart, boldIndex) => {
+            const isBold = boldPart.startsWith('**') && boldPart.endsWith('**');
+            const textToProcess = isBold ? boldPart.slice(2, -2) : boldPart;
+
+            // Inside (or outside) bold, split by LaTeX ($$...$$ or $...$)
+            const latexParts = textToProcess.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g);
+
+            const renderedLatexParts = latexParts.map((latexPart, latexIndex) => {
+                if (latexPart.startsWith('$$') && latexPart.endsWith('$$')) {
+                    return <Latex key={latexIndex} block>{latexPart.slice(2, -2)}</Latex>;
+                } else if (latexPart.startsWith('$') && latexPart.endsWith('$')) {
+                    return <Latex key={latexIndex}>{latexPart.slice(1, -1)}</Latex>;
+                }
+
+                // Inside non-LaTeX parts, apply Italic (*...*)
+                const italicParts = latexPart.split(/(\*[^*]+?\*)/g);
+                return (
+                    <React.Fragment key={latexIndex}>
+                        {italicParts.map((iPart, iIdx) => {
+                            if (iPart.startsWith('*') && iPart.endsWith('*') && iPart.length > 2) {
+                                return <em key={iIdx} className="italic text-slate-500">{iPart.slice(1, -1)}</em>;
+                            }
+                            return iPart;
+                        })}
+                    </React.Fragment>
+                );
+            });
+
+            if (isBold) {
+                return <strong key={boldIndex} className="font-bold">{renderedLatexParts}</strong>;
+            }
+            return <React.Fragment key={boldIndex}>{renderedLatexParts}</React.Fragment>;
         });
     };
 

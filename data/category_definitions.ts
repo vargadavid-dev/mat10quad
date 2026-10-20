@@ -63,6 +63,7 @@ export const categories: Category[] = [
         id: 'geometry',
         title: 'Geometria',
         subcategories: [
+            { id: 'pythagoras', title: 'Pitagorasz-tétel', isAvailable: true },
             { id: 'circle', title: 'Kör', isAvailable: true },
             { id: 'plane_geometry', title: 'Egyéb Síkgeometria' },
             { id: 'trigonometry', title: 'Trigonometria' },
