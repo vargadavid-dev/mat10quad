@@ -138,10 +138,11 @@ const HexGrid: React.FC<HexGridProps> = ({ hexes, owners, scores, tileTypes, dif
                     </radialGradient>
                 ))}
 
-                {/* Neutral hex gradient - LIGHTENED for better visibility */}
-                <radialGradient id="fill-neutral" cx="50%" cy="45%" r="70%">
-                    <stop offset="0%" stopColor="#475569" stopOpacity="0.6" /> {/* slate-600 */}
-                    <stop offset="100%" stopColor="#334155" stopOpacity="0.4" /> {/* slate-700 */}
+                {/* Neutral hex gradient - Deep cosmic tactical styling */}
+                <radialGradient id="fill-neutral" cx="50%" cy="45%" r="75%">
+                    <stop offset="0%" stopColor="#1e293b" stopOpacity="0.85" />
+                    <stop offset="60%" stopColor="#0f172a" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#090d16" stopOpacity="0.95" />
                 </radialGradient>
             </defs>
 
@@ -293,17 +294,17 @@ const HexGrid: React.FC<HexGridProps> = ({ hexes, owners, scores, tileTypes, dif
                             />
                         )}
 
-                        {/* Shield number */}
+                        {/* Shield number & HQ Indicator */}
                         {owner && score > 0 && (
                             <>
                                 {/* Shield background circle */}
                                 <circle
                                     cx={x}
                                     cy={y}
-                                    r={12}
-                                    fill={`${teamColor!.gradient[0]}cc`} // More opaque
+                                    r={13}
+                                    fill={`${teamColor!.gradient[0]}ee`}
                                     stroke={teamColor!.shieldColor}
-                                    strokeWidth={1.5}
+                                    strokeWidth={2}
                                 />
                                 <text
                                     x={x}
@@ -315,10 +316,24 @@ const HexGrid: React.FC<HexGridProps> = ({ hexes, owners, scores, tileTypes, dif
                                     fontWeight="900"
                                     fontFamily="monospace"
                                     className="pointer-events-none"
-                                    style={{ textShadow: '0 0 6px rgba(0,0,0,0.8)' }}
+                                    style={{ textShadow: '0 0 6px rgba(0,0,0,0.9)' }}
                                 >
                                     {score}
                                 </text>
+
+                                {/* HQ Crown Badge if shield is 5 */}
+                                {score === 5 && (
+                                    <text
+                                        x={x}
+                                        y={y - HEX_SIZE * 0.42}
+                                        dy=".35em"
+                                        textAnchor="middle"
+                                        fontSize="11"
+                                        className="pointer-events-none select-none filter drop-shadow-[0_0_4px_rgba(250,204,21,0.8)]"
+                                    >
+                                        👑
+                                    </text>
+                                )}
                             </>
                         )}
 

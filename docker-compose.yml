@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  math-app:
+    image: matek  # Itt hivatkozunk a manuálisan létrehozott image nevére
+    container_name: mat10quad-app
+    ports:
+      - "5000:80"  # A böngészőben a http://szerver-ip-cime:3000 címen éred el
+    restart: unless-stopped
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1.0'    # Nginx-nek bőven elég 1 mag is
+#          memory: 512M   # Mivel nincs Node.js futásidőben, 512MB is királyi ellátás
